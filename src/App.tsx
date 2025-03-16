@@ -335,7 +335,7 @@ function App() {
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-gray-900">Categories</h2>
                 <button
-                  onClick={() => setEditingCategory(null)}
+                  onClick={() => setEditingCategory({ id: '', user_id: '', name: '', icon: 'ShoppingCart', color: 'text-indigo-500', created_at: '' })}
                   className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center"
                 >
                   <Plus className="w-5 h-5 mr-2" />
@@ -343,7 +343,7 @@ function App() {
                 </button>
               </div>
 
-              {editingCategory === null ? (
+              {!editingCategory ? (
                 <div className="grid gap-4">
                   {categories.map((category) => {
                     const IconComponent = Icons[category.icon as keyof typeof Icons];
