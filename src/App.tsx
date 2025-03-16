@@ -108,6 +108,7 @@ function App() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
   const [clearDataLoading, setClearDataLoading] = useState(false);
+  const [signOutLoading, setSignOutLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -226,6 +227,21 @@ function App() {
     }
   };
 
+  const handleSignOut = async () => {
+    if (signOutLoading) return;
+    
+    setSignOutLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error signing out:', error);
+      alert('Failed to sign out. Please try again.');
+    } finally {
+      setSignOutLoading(false);
+    }
+  };
+
   const summary = {
     total: expenses.reduce((sum, exp) => sum + exp.amount, 0),
     byCategory: expenses.reduce((acc, exp) => {
@@ -320,10 +336,11 @@ function App() {
           </div>
         </div>
         <button
-          onClick={() => supabase.auth.signOut()}
-          className="text-gray-600 hover:text-gray-900"
+          onClick={handleSignOut}
+          disabled={signOutLoading}
+          className="text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className={`w-5 h-5 ${signOutLoading ? 'animate-pulse' : ''}`} />
         </button>
       </header>
 
