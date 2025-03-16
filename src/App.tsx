@@ -6,18 +6,26 @@ import { supabase } from './lib/supabase';
 import { ExpenseForm } from './components/ExpenseForm';
 import { ExpenseList } from './components/ExpenseList';
 import { ExpenseSummary } from './components/ExpenseSummary';
-import { CategoryForm } from './components/CategoryForm';
+// import { CategoryForm } from './components/CategoryForm';
 import { AuthForm } from './components/AuthForm';
 import { Expense, Category } from './types';
 
+// Default categories to use while the categories feature is disabled
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: '1', user_id: '', name: 'Restaurant Dining', icon: 'Utensils', color: 'text-orange-500', created_at: '' },
+  { id: '2', user_id: '', name: 'Groceries', icon: 'ShoppingCart', color: 'text-green-500', created_at: '' },
+  { id: '3', user_id: '', name: 'Transport', icon: 'Car', color: 'text-blue-500', created_at: '' },
+  { id: '4', user_id: '', name: 'Entertainment', icon: 'Film', color: 'text-purple-500', created_at: '' },
+  { id: '5', user_id: '', name: 'Utilities', icon: 'Zap', color: 'text-amber-500', created_at: '' }
+];
+
 function App() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'categories'>('list');
+  const [activeView, setActiveView] = useState<'list' | 'add' | 'summary'>('list');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,85 +43,8 @@ function App() {
   useEffect(() => {
     if (user) {
       loadExpenses();
-      loadCategories();
     }
   }, [user]);
-
-  const loadCategories = async () => {
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name');
-
-    if (error) {
-      console.error('Error loading categories:', error);
-      return;
-    }
-
-    setCategories(data || []);
-  };
-
-  const addCategory = async (category: Partial<Category>) => {
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('categories')
-      .insert([{
-        ...category,
-        user_id: user.id
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error('A category with this name already exists');
-      }
-      throw error;
-    }
-
-    setCategories(prev => [...prev, data]);
-  };
-
-  const updateCategory = async (category: Partial<Category>) => {
-    if (!category.id) return;
-
-    const { error } = await supabase
-      .from('categories')
-      .update({
-        name: category.name,
-        icon: category.icon,
-        color: category.color
-      })
-      .eq('id', category.id);
-
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error('A category with this name already exists');
-      }
-      throw error;
-    }
-
-    setCategories(prev => 
-      prev.map(c => c.id === category.id ? { ...c, ...category } : c)
-    );
-  };
-
-  const deleteCategory = async (id: string) => {
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting category:', error);
-      return;
-    }
-
-    setCategories(prev => prev.filter(c => c.id !== id));
-  };
 
   const loadExpenses = async () => {
     if (!user) return;
@@ -329,73 +260,11 @@ function App() {
               <ExpenseSummary summary={summary} categories={categories} />
             </div>
           )}
-
-          {activeView === 'categories' && (
-            <div className="p-4 space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">Categories</h2>
-                <button
-                  onClick={() => setEditingCategory({ id: '', user_id: '', name: '', icon: 'ShoppingCart', color: 'text-indigo-500', created_at: '' })}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Add Category
-                </button>
-              </div>
-
-              {!editingCategory ? (
-                <div className="grid gap-4">
-                  {categories.map((category) => {
-                    const IconComponent = Icons[category.icon as keyof typeof Icons];
-                    return (
-                      <div
-                        key={category.id}
-                        className="bg-white p-4 rounded-lg shadow-sm flex items-center justify-between"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-gray-50 rounded-full">
-                            {IconComponent && (
-                              <IconComponent className={`w-5 h-5 ${category.color}`} />
-                            )}
-                          </div>
-                          <span className="font-medium">{category.name}</span>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => setEditingCategory(category)}
-                            className="text-gray-400 hover:text-indigo-600"
-                          >
-                            <Pencil className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (window.confirm('Delete this category?')) {
-                                deleteCategory(category.id);
-                              }
-                            }}
-                            className="text-gray-400 hover:text-red-600"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <CategoryForm
-                  onSubmit={editingCategory ? updateCategory : addCategory}
-                  initialCategory={editingCategory}
-                  onCancel={() => setEditingCategory(null)}
-                />
-              )}
-            </div>
-          )}
         </div>
       </main>
 
       <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0">
-        <div className="grid grid-cols-4 h-16">
+        <div className="grid grid-cols-3 h-16">
           <button
             onClick={() => setActiveView('list')}
             className={`flex flex-col items-center justify-center ${
@@ -425,18 +294,6 @@ function App() {
           >
             <PieChart className="w-6 h-6" />
             <span className="text-xs mt-1">Summary</span>
-          </button>
-          <button
-            onClick={() => {
-              setEditingCategory(null);
-              setActiveView('categories');
-            }}
-            className={`flex flex-col items-center justify-center ${
-              activeView === 'categories' ? 'text-indigo-600' : 'text-gray-600'
-            }`}
-          >
-            <Settings className="w-6 h-6" />
-            <span className="text-xs mt-1">Categories</span>
           </button>
         </div>
       </nav>
