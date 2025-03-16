@@ -290,8 +290,9 @@ function App() {
           {activeView === 'list' && (
             <div className="h-full">
               {expenses.length > 0 ? (
-                <ExpenseList 
-                  expenses={expenses} 
+                <ExpenseList
+                  expenses={expenses}
+                  categories={categories}
                   onEdit={(expense) => {
                     setEditingExpense(expense);
                     setActiveView('add');
