@@ -133,9 +133,13 @@ export function ExpenseSummary({ summary }: ExpenseSummaryProps) {
               datasets: [
                 {
                   data: summary.categoryData.data,
-                  backgroundColor: summary.categoryData.colors.map(
-                    color => `rgb(var(--${color}))`
-                  ),
+                  backgroundColor: [
+                    '#f97316', // orange-500
+                    '#22c55e', // green-500
+                    '#f59e0b', // amber-500
+                    '#ef4444', // red-500
+                    '#3b82f6', // blue-500
+                  ],
                 },
               ],
             }}
@@ -146,7 +150,9 @@ export function ExpenseSummary({ summary }: ExpenseSummaryProps) {
                 legend: {
                   position: 'bottom',
                   labels: {
+                    usePointStyle: true,
                     boxWidth: 12,
+                    color: '#4b5563', // text-gray-600
                   },
                 },
               },

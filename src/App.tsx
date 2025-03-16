@@ -170,11 +170,7 @@ function App() {
       labels: sortedCategories.map(([id]) => 
         categories.find(c => c.id === id)?.name || id
       ),
-      data: sortedCategories.map(([, amount]) => amount),
-      colors: sortedCategories.map(([id]) => {
-        const category = categories.find(c => c.id === id);
-        return category?.color.replace('text-', '') || 'gray-500';
-      }),
+      data: sortedCategories.map(([, amount]) => amount)
     };
   }
 
