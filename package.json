@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "install-deps": "npm install",
+    "dev": "npm run install-deps && vite",
+    "build": "npm run install-deps && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
