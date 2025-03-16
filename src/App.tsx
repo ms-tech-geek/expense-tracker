@@ -7,6 +7,7 @@ import { ExpenseList } from './components/ExpenseList';
 import { ExpenseSummary } from './components/ExpenseSummary';
 import { AuthForm } from './components/AuthForm';
 import { Expense } from './types';
+import { categories } from './data/categories';
 
 function App() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
