@@ -12,6 +12,7 @@ export interface Category {
   name: string;
   icon: string;
   color: string;
+  parent_id?: string;
   created_at: string;
 }
 
