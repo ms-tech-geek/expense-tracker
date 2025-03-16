@@ -11,7 +11,7 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
-import { ExpenseSummary as Summary, Category } from '../types';
+import { ExpenseSummary as Summary, Category } from '../../types';
 
 ChartJS.register(
   CategoryScale,

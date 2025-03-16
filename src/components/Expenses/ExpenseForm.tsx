@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Save, X } from 'lucide-react';
-import { Expense, Category } from '../types';
+import { Expense, Category } from '../../types';
 
 interface GroupedCategories {
   [key: string]: {

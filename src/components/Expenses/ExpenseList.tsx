@@ -1,7 +1,7 @@
 import React from 'react';
-import { Expense, Category } from '../types';
+import { Expense, Category } from '../../types';
 import * as Icons from 'lucide-react';
-import { Pencil, Trash2, Settings } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface ExpenseListProps {
   expenses: Expense[];

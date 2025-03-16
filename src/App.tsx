@@ -3,13 +3,10 @@ import { Wallet } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useExpenses } from './hooks/useExpenses';
 import { useCategories } from './hooks/useCategories';
-import { Header } from './components/Layout/Header';
-import { Navigation } from './components/Layout/Navigation';
-import { SettingsView } from './components/Settings/SettingsView';
-import { ExpenseForm } from './components/ExpenseForm';
-import { ExpenseList } from './components/ExpenseList';
-import { ExpenseSummary } from './components/ExpenseSummary';
-import { AuthForm } from './components/AuthForm';
+import { Header, Navigation } from './components/Layout';
+import { SettingsView } from './components/Settings';
+import { ExpenseForm, ExpenseList, ExpenseSummary } from './components/Expenses';
+import { AuthForm } from './components/Auth';
 import { calculateExpenseSummary } from './utils/expenseCalculations';
 import { supabase } from './lib/supabase';
 
