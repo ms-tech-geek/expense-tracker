@@ -9,7 +9,7 @@ import { Expense } from './types';
 
 function App() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [user, setUser] = useState(supabase.auth.getUser());
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

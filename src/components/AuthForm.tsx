@@ -9,24 +9,57 @@ export function AuthForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const validateForm = () => {
+    if (!email.trim() || !password.trim()) {
+      setError('Email and password are required');
+      return false;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message === 'Invalid login credentials') {
+            throw new Error('Invalid email or password');
+          }
+          throw error;
+        }
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('password')) {
+            throw new Error('Password is too weak. Please use at least 6 characters');
+          }
+          throw error;
+        }
+        if (data.user && !data.session) {
+          setError('Please check your email to confirm your account');
+          setEmail('');
+          setPassword('');
+          return;
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -51,8 +84,10 @@ export function AuthForm() {
             type="email"
             required
             value={email}
+            autoComplete="email"
             onChange={(e) => setEmail(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            placeholder="you@example.com"
           />
         </div>
 
@@ -65,13 +100,21 @@ export function AuthForm() {
             type="password"
             required
             value={password}
+            autoComplete={isLogin ? "current-password" : "new-password"}
+            minLength={6}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            placeholder="••••••"
           />
+          <p className="mt-1 text-xs text-gray-500">
+            {!isLogin && 'Must be at least 6 characters'}
+          </p>
         </div>
 
         {error && (
-          <div className="text-red-600 text-sm">{error}</div>
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
         )}
 
         <button
