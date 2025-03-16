@@ -213,7 +213,10 @@ function App() {
               {expenses.length > 0 ? (
                 <ExpenseList 
                   expenses={expenses} 
-                  onEdit={setEditingExpense}
+                  onEdit={(expense) => {
+                    setEditingExpense(expense);
+                    setActiveView('add');
+                  }}
                   onDelete={deleteExpense}
                 />
               ) : (

@@ -53,7 +53,9 @@ export function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListProps) {
             </div>
             <div className="flex space-x-3">
               <button
-                onClick={() => onEdit(expense)}
+                onClick={() => {
+                  onEdit(expense);
+                }}
                 className="text-gray-400 hover:text-indigo-600 transition-colors"
                 title="Edit expense"
               >
