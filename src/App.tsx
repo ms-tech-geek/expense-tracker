@@ -130,7 +130,10 @@ function App() {
           <div className="bg-indigo-600 p-2 rounded-full">
             <Wallet className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Expense Tracker</h1>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Expense Tracker</h1>
+            <p className="text-sm text-gray-600">by Ms Tech Geek</p>
+          </div>
         </div>
         <button
           onClick={() => supabase.auth.signOut()}
