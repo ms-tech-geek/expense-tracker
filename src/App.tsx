@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Wallet } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { ExpenseForm } from './components/ExpenseForm';
@@ -11,6 +11,7 @@ function App() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -51,13 +52,13 @@ function App() {
     if (!user) return;
 
     const { data, error } = await supabase
-    .from('expenses')
-    .insert([{
-      ...newExpense,
-      user_id: user.id
-    }])
-    .select()
-    .single();
+      .from('expenses')
+      .insert([{
+        ...newExpense,
+        user_id: user.id
+      }])
+      .select()
+      .single();
 
     if (error) {
       console.error('Error adding expense:', error);
@@ -65,6 +66,40 @@ function App() {
     }
 
     setExpenses((prev) => [data, ...prev]);
+  };
+
+  const updateExpense = async (expense: Expense) => {
+    const { error } = await supabase
+      .from('expenses')
+      .update({
+        amount: expense.amount,
+        category: expense.category,
+        description: expense.description,
+        date: expense.date
+      })
+      .eq('id', expense.id);
+
+    if (error) {
+      console.error('Error updating expense:', error);
+      return;
+    }
+
+    setExpenses(prev => prev.map(e => e.id === expense.id ? expense : e));
+    setEditingExpense(null);
+  };
+
+  const deleteExpense = async (id: string) => {
+    const { error } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting expense:', error);
+      return;
+    }
+
+    setExpenses(prev => prev.filter(e => e.id !== id));
   };
 
   const summary = {
@@ -99,7 +134,11 @@ function App() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        <ExpenseForm onSubmit={addExpense} />
+        <ExpenseForm 
+          onSubmit={editingExpense ? updateExpense : addExpense}
+          initialExpense={editingExpense}
+          onCancel={() => setEditingExpense(null)}
+        />
         
         {expenses.length > 0 && (
           <>
@@ -109,7 +148,11 @@ function App() {
 
             <div className="mt-8">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Expenses</h2>
-              <ExpenseList expenses={expenses} />
+              <ExpenseList 
+                expenses={expenses} 
+                onEdit={setEditingExpense}
+                onDelete={deleteExpense}
+              />
             </div>
           </>
         )}

@@ -1,27 +1,43 @@
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Save, X } from 'lucide-react';
 import { categories } from '../data/categories';
 import { Expense } from '../types';
 
 interface ExpenseFormProps {
-  onSubmit: (expense: Omit<Expense, 'id'>) => void;
+  onSubmit: (expense: any) => void;
+  initialExpense: Expense | null;
+  onCancel: () => void;
 }
 
-export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
+export function ExpenseForm({ onSubmit, initialExpense, onCancel }: ExpenseFormProps) {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    if (initialExpense) {
+      setAmount(initialExpense.amount.toString());
+      setCategory(initialExpense.category);
+      setDescription(initialExpense.description || '');
+    }
+  }, [initialExpense]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !category) return;
 
-    onSubmit({
+    const expenseData = {
       amount: parseFloat(amount),
       category,
       description,
-      date: new Date().toISOString(),
-    });
+      date: initialExpense?.date || new Date().toISOString(),
+    };
+
+    if (initialExpense) {
+      onSubmit({ ...expenseData, id: initialExpense.id });
+    } else {
+      onSubmit(expenseData);
+    }
 
     setAmount('');
     setCategory('');
@@ -30,6 +46,21 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-medium text-gray-900">
+          {initialExpense ? 'Edit Expense' : 'Add New Expense'}
+        </h2>
+        {initialExpense && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-gray-400 hover:text-gray-500"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
       <div>
         <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
           Amount
@@ -93,8 +124,17 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
         type="submit"
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
-        <Plus className="w-5 h-5 mr-2" />
-        Add Expense
+        {initialExpense ? (
+          <>
+            <Save className="w-5 h-5 mr-2" />
+            Save Changes
+          </>
+        ) : (
+          <>
+            <Plus className="w-5 h-5 mr-2" />
+            Add Expense
+          </>
+        )}
       </button>
     </form>
   );
