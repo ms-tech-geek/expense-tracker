@@ -7,9 +7,10 @@ interface ExpenseFormProps {
   onSubmit: (expense: any) => void;
   initialExpense: Expense | null;
   onCancel: () => void;
+  onSuccess?: () => void;
 }
 
-export function ExpenseForm({ onSubmit, initialExpense, onCancel }: ExpenseFormProps) {
+export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess }: ExpenseFormProps) {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
@@ -42,12 +43,13 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel }: ExpenseFormP
     setAmount('');
     setCategory('');
     setDescription('');
+    onSuccess?.();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-gray-900">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-900">
           {initialExpense ? 'Edit Expense' : 'Add New Expense'}
         </h2>
         {initialExpense && (
@@ -65,7 +67,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel }: ExpenseFormP
         <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
           Amount
         </label>
-        <div className="mt-1 relative rounded-md shadow-sm">
+        <div className="mt-2 relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <span className="text-gray-500 sm:text-sm">₹</span>
           </div>
@@ -92,7 +94,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel }: ExpenseFormP
           required
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          className="mt-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
         >
           <option value="">Select a category</option>
           {categories.map((cat) => (
@@ -107,7 +109,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel }: ExpenseFormP
         <label htmlFor="description" className="block text-sm font-medium text-gray-700">
           Description (Optional)
         </label>
-        <div className="mt-1">
+        <div className="mt-2">
           <input
             type="text"
             name="description"
@@ -122,7 +124,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel }: ExpenseFormP
 
       <button
         type="submit"
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
         {initialExpense ? (
           <>

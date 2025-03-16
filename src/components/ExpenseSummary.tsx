@@ -9,8 +9,8 @@ interface ExpenseSummaryProps {
 
 export function ExpenseSummary({ summary }: ExpenseSummaryProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="bg-white p-4 rounded-lg shadow-sm">
+    <div className="space-y-6">
+      <div className="bg-white p-6 -mx-4">
         <div className="flex items-center space-x-2 mb-4">
           <TrendingUp className="w-5 h-5 text-indigo-500" />
           <h3 className="font-medium text-gray-900">Total Expenses</h3>
@@ -20,7 +20,7 @@ export function ExpenseSummary({ summary }: ExpenseSummaryProps) {
         </p>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="bg-white p-6 -mx-4">
         <div className="flex items-center space-x-2 mb-4">
           <PieChart className="w-5 h-5 text-indigo-500" />
           <h3 className="font-medium text-gray-900">By Category</h3>

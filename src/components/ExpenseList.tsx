@@ -25,11 +25,11 @@ export function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="divide-y divide-gray-100">
       {expenses.map((expense) => (
         <div
           key={expense.id}
-          className="bg-white p-4 rounded-lg shadow-sm flex items-center justify-between group"
+          className="bg-white p-4 flex items-center justify-between group"
         >
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-gray-50 rounded-full">
@@ -49,9 +49,9 @@ export function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListProps) {
               <p className="font-medium text-gray-900">
                 ₹{expense.amount.toFixed(2)}
               </p>
-              <p className="text-sm text-gray-500">{formatDate(expense.date)}</p>
+              <p className="text-xs text-gray-500">{formatDate(expense.date)}</p>
             </div>
-            <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex space-x-3">
               <button
                 onClick={() => onEdit(expense)}
                 className="text-gray-400 hover:text-indigo-600 transition-colors"
