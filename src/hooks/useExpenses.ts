@@ -1,37 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Expense } from '../types';
 
 export function useExpenses(userId: string | undefined) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadExpenses = useCallback(async () => {
+    if (!userId) return;
+
+    setError(null);
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('*')
+      .eq('user_id', userId)
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error loading expenses:', error);
+      setError('Failed to load expenses. Please try again.');
+      setExpenses([]);
+    } else {
+      setExpenses(data || []);
+      return;
+    }
+  }
+  )
 
   useEffect(() => {
     if (userId) {
       loadExpenses();
     }
-  }, [userId]);
-
-  const loadExpenses = async () => {
-    if (!userId) return;
-
-    const { data, error } = await supabase
-      .from('expenses')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (error) {
-      console.error('Error loading expenses:', error);
-      return;
-    }
-
-    setExpenses(data || []);
-    setLoading(false);
-  };
+  }, [userId, loadExpenses]);
 
   const addExpense = async (newExpense: Omit<Expense, 'id'>) => {
     if (!userId) return;
 
+    setError(null);
     const { data, error } = await supabase
       .from('expenses')
       .insert([{
@@ -43,6 +49,7 @@ export function useExpenses(userId: string | undefined) {
 
     if (error) {
       console.error('Error adding expense:', error);
+      throw error;
       return;
     }
 
@@ -50,6 +57,7 @@ export function useExpenses(userId: string | undefined) {
   };
 
   const updateExpense = async (expense: Expense) => {
+    setError(null);
     const { error } = await supabase
       .from('expenses')
       .update({
@@ -62,6 +70,7 @@ export function useExpenses(userId: string | undefined) {
 
     if (error) {
       console.error('Error updating expense:', error);
+      throw error;
       return;
     }
 
@@ -69,6 +78,7 @@ export function useExpenses(userId: string | undefined) {
   };
 
   const deleteExpense = async (id: string) => {
+    setError(null);
     const { error } = await supabase
       .from('expenses')
       .delete()
@@ -76,6 +86,7 @@ export function useExpenses(userId: string | undefined) {
 
     if (error) {
       console.error('Error deleting expense:', error);
+      throw error;
       return;
     }
 
@@ -88,6 +99,8 @@ export function useExpenses(userId: string | undefined) {
     addExpense,
     updateExpense,
     deleteExpense,
-    setExpenses
+    setExpenses,
+    error,
+    loadExpenses
   };
 }
