@@ -26,7 +26,7 @@ function getWeeklyData(expenses: Expense[]) {
   const data = days.map(day => {
     return expenses
       .filter(exp => {
-        const expDate = new Date(exp.date);
+        const expDate = new Date(exp.expense_date);
         return format(expDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
       })
       .reduce((sum, exp) => sum + exp.amount, 0);
@@ -45,7 +45,7 @@ function getMonthlyData(expenses: Expense[]) {
     const weekEnd = endOfWeek(weekStart);
     return expenses
       .filter(exp => {
-        const expDate = new Date(exp.date);
+        const expDate = new Date(exp.expense_date);
         return expDate >= weekStart && expDate <= weekEnd;
       })
       .reduce((sum, exp) => sum + exp.amount, 0);

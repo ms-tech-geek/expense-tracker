@@ -15,7 +15,7 @@ export function useExpenses(userId: string | undefined) {
       .from('expenses')
       .select('*')
       .eq('user_id', userId)
-      .order('date', { ascending: false });
+      .order('expense_date', { ascending: false });
 
     if (error) {
       console.error('Error loading expenses:', error);
@@ -63,7 +63,7 @@ export function useExpenses(userId: string | undefined) {
         amount: expense.amount,
         category: expense.category,
         description: expense.description,
-        date: expense.date
+        expense_date: expense.expense_date
       })
       .eq('id', expense.id);
 

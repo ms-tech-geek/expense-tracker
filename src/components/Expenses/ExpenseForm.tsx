@@ -21,6 +21,9 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [expenseDate, setExpenseDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
 
   const groupedCategories = categories.reduce((acc: GroupedCategories, cat) => {
     if (!cat.parent_id) {
@@ -45,6 +48,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
       setAmount(initialExpense.amount.toString());
       setCategory(initialExpense.category);
       setDescription(initialExpense.description || '');
+      setExpenseDate(new Date(initialExpense.expense_date).toISOString().split('T')[0]);
     }
   }, [initialExpense]);
 
@@ -56,7 +60,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
       amount: parseFloat(amount),
       category,
       description,
-      date: initialExpense?.date || new Date().toISOString(),
+      expense_date: new Date(expenseDate).toISOString(),
     };
 
     if (initialExpense) {
@@ -106,6 +110,24 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
             onChange={(e) => setAmount(e.target.value)}
             className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
             placeholder="0.00"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="expenseDate" className="block text-sm font-medium text-gray-700">
+          Date
+        </label>
+        <div className="mt-2">
+          <input
+            type="date"
+            name="expenseDate"
+            id="expenseDate"
+            required
+            value={expenseDate}
+            max={new Date().toISOString().split('T')[0]}
+            onChange={(e) => setExpenseDate(e.target.value)}
+            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
           />
         </div>
       </div>

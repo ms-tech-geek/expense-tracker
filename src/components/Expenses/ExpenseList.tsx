@@ -15,6 +15,17 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
     });
   };
 
@@ -49,7 +60,13 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
               <p className="font-medium text-gray-900">
                 ₹{expense.amount.toFixed(2)}
               </p>
-              <p className="text-xs text-gray-500">{formatDate(expense.date)}</p>
+              <p className="text-xs text-gray-500">{formatDate(expense.expense_date)}</p>
+              <p className="text-xs text-gray-400">
+                Added: {formatDateTime(expense.created_at)}
+                {expense.updated_at !== expense.created_at && (
+                  <> • Updated: {formatDateTime(expense.updated_at)}</>
+                )}
+              </p>
             </div>
             <div className="flex space-x-3">
               <button

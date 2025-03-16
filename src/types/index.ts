@@ -3,7 +3,9 @@ export interface Expense {
   amount: number;
   category: string;
   description: string;
-  date: string;
+  expense_date: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Category {
