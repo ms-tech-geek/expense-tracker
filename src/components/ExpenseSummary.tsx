@@ -16,7 +16,7 @@ export function ExpenseSummary({ summary }: ExpenseSummaryProps) {
           <h3 className="font-medium text-gray-900">Total Expenses</h3>
         </div>
         <p className="text-2xl font-bold text-gray-900">
-          ${summary.total.toFixed(2)}
+          ₹{summary.total.toFixed(2)}
         </p>
       </div>
 
@@ -33,7 +33,7 @@ export function ExpenseSummary({ summary }: ExpenseSummaryProps) {
             return (
               <div key={categoryId} className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{category.name}</span>
-                <span className="font-medium">${amount.toFixed(2)}</span>
+                <span className="font-medium">₹{amount.toFixed(2)}</span>
               </div>
             );
           })}

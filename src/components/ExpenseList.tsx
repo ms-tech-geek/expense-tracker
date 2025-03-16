@@ -43,7 +43,7 @@ export function ExpenseList({ expenses }: ExpenseListProps) {
           </div>
           <div className="text-right">
             <p className="font-medium text-gray-900">
-              ${expense.amount.toFixed(2)}
+              ₹{expense.amount.toFixed(2)}
             </p>
             <p className="text-sm text-gray-500">{formatDate(expense.date)}</p>
           </div>
