@@ -1,16 +1,16 @@
 import React from 'react';
-import { categories } from '../data/categories';
-import { Expense } from '../types';
+import { Expense, Category } from '../types';
 import * as Icons from 'lucide-react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Settings } from 'lucide-react';
 
 interface ExpenseListProps {
   expenses: Expense[];
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
+  categories: Category[];
 }
 
-export function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListProps) {
+export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseListProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',

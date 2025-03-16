@@ -11,8 +11,7 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
-import { ExpenseSummary as Summary } from '../types';
-import { categories } from '../data/categories';
+import { ExpenseSummary as Summary, Category } from '../types';
 
 ChartJS.register(
   CategoryScale,
@@ -26,9 +25,10 @@ ChartJS.register(
 
 interface ExpenseSummaryProps {
   summary: Summary;
+  categories: Category[];
 }
 
-export function ExpenseSummary({ summary }: ExpenseSummaryProps) {
+export function ExpenseSummary({ summary, categories }: ExpenseSummaryProps) {
   return (
     <div className="space-y-6 pb-20">
       <div className="bg-white p-6 -mx-4">

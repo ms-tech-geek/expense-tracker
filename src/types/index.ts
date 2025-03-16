@@ -6,12 +6,14 @@ export interface Expense {
   date: string;
 }
 
-export type ExpenseCategory = {
+export interface Category {
   id: string;
+  user_id: string;
   name: string;
   icon: string;
   color: string;
-};
+  created_at: string;
+}
 
 export interface ExpenseSummary {
   total: number;

@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Save, X } from 'lucide-react';
-import { categories } from '../data/categories';
-import { Expense } from '../types';
+import { Expense, Category } from '../types';
 
 interface ExpenseFormProps {
   onSubmit: (expense: any) => void;
   initialExpense: Expense | null;
   onCancel: () => void;
   onSuccess?: () => void;
+  categories: Category[];
 }
 
-export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess }: ExpenseFormProps) {
+export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, categories }: ExpenseFormProps) {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
