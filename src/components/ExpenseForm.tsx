@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Save, X } from 'lucide-react';
 import { Expense, Category } from '../types';
 
+interface GroupedCategories {
+  [key: string]: {
+    parent: Category;
+    children: Category[];
+  };
+}
+
 interface ExpenseFormProps {
   onSubmit: (expense: any) => void;
   initialExpense: Expense | null;
@@ -14,6 +21,24 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+
+  const groupedCategories = categories.reduce((acc: GroupedCategories, cat) => {
+    if (!cat.parent_id) {
+      // This is a parent category
+      if (!acc[cat.id]) {
+        acc[cat.id] = {
+          parent: cat,
+          children: []
+        };
+      }
+    } else {
+      // This is a child category
+      if (acc[cat.parent_id]) {
+        acc[cat.parent_id].children.push(cat);
+      }
+    }
+    return acc;
+  }, {});
 
   useEffect(() => {
     if (initialExpense) {
@@ -97,10 +122,18 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
           className="mt-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
         >
           <option value="">Select a category</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
+          {Object.values(groupedCategories).map(({ parent, children }) => (
+            <optgroup key={parent.id} label={parent.name}>
+              {children.map((child) => (
+                <option
+                  key={child.id}
+                  value={child.id}
+                  disabled={!child.parent_id} // Disable parent categories
+                >
+                  {child.name}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </div>
