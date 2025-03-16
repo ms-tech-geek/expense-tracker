@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, Plus, BarChart, List, LogOut } from 'lucide-react';
+import { Wallet, Plus, BarChart, List, LogOut, PieChart } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, startOfMonth, endOfMonth, eachWeekOfInterval } from 'date-fns';
 import { supabase } from './lib/supabase';
 import { ExpenseForm } from './components/ExpenseForm';
