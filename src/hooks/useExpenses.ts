@@ -21,12 +21,12 @@ export function useExpenses(userId: string | undefined) {
       console.error('Error loading expenses:', error);
       setError('Failed to load expenses. Please try again.');
       setExpenses([]);
+      setLoading(false);
     } else {
       setExpenses(data || []);
-      return;
+      setLoading(false);
     }
-  }
-  )
+  }, [userId]);
 
   useEffect(() => {
     if (userId) {
@@ -50,7 +50,6 @@ export function useExpenses(userId: string | undefined) {
     if (error) {
       console.error('Error adding expense:', error);
       throw error;
-      return;
     }
 
     setExpenses((prev) => [data, ...prev]);
@@ -71,7 +70,6 @@ export function useExpenses(userId: string | undefined) {
     if (error) {
       console.error('Error updating expense:', error);
       throw error;
-      return;
     }
 
     setExpenses(prev => prev.map(e => e.id === expense.id ? expense : e));
@@ -87,7 +85,6 @@ export function useExpenses(userId: string | undefined) {
     if (error) {
       console.error('Error deleting expense:', error);
       throw error;
-      return;
     }
 
     setExpenses(prev => prev.filter(e => e.id !== id));
