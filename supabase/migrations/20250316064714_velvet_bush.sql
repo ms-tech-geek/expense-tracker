@@ -4,7 +4,7 @@
   1. New Tables
     - `categories`
       - `id` (uuid, primary key)
-      - `user_id` (uuid, foreign key to users)
+      - `user_id` (uuid, foreign key to auth.users)
       - `name` (text)
       - `icon` (text)
       - `color` (text)
@@ -18,7 +18,7 @@
 -- Create categories table
 CREATE TABLE IF NOT EXISTS categories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES users(id),
+  user_id uuid NOT NULL REFERENCES auth.users(id),
   name text NOT NULL,
   icon text NOT NULL,
   color text NOT NULL,
@@ -55,14 +55,14 @@ CREATE POLICY "Users can delete their own categories"
   TO authenticated
   USING (auth.uid() = user_id);
 
--- Insert default categories for existing users
+-- Insert default categories for all authenticated users
 INSERT INTO categories (user_id, name, icon, color)
 SELECT 
-  u.id as user_id,
+  id as user_id,
   c.name,
   c.icon,
   c.color
-FROM users u
+FROM auth.users
 CROSS JOIN (
   VALUES 
     ('Restaurant Dining', 'Utensils', 'text-orange-500'),
