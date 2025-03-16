@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, Plus, BarChart, List, LogOut, PieChart, Settings, Pencil, Trash2 } from 'lucide-react';
+import { Wallet, Plus, List, LogOut, PieChart, Settings, AlertTriangle } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, startOfMonth, endOfMonth, eachWeekOfInterval } from 'date-fns';
 import { supabase } from './lib/supabase';
@@ -106,7 +106,8 @@ function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-  const [activeView, setActiveView] = useState<'list' | 'add' | 'summary'>('list');
+  const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
+  const [clearDataLoading, setClearDataLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -195,6 +196,34 @@ function App() {
     }
 
     setExpenses(prev => prev.filter(e => e.id !== id));
+  };
+
+  const handleClearData = async () => {
+    if (!user) return;
+    
+    if (!window.confirm('Are you sure you want to clear all expense data? This action cannot be undone.')) {
+      return;
+    }
+    
+    setClearDataLoading(true);
+    try {
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setExpenses([]);
+      alert('All expense data has been cleared successfully.');
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      alert('Failed to clear data. Please try again.');
+    } finally {
+      setClearDataLoading(false);
+    }
   };
 
   const summary = {
@@ -341,11 +370,42 @@ function App() {
               <ExpenseSummary summary={summary} categories={categories} />
             </div>
           )}
+
+          {activeView === 'settings' && (
+            <div className="p-4 space-y-6">
+              <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
+              
+              <div className="bg-white rounded-lg shadow p-4 space-y-4">
+                <h3 className="font-medium text-gray-900">Data Management</h3>
+                
+                <div className="border-t pt-4">
+                  <div className="flex items-start space-x-4 text-left">
+                    <div className="p-2 bg-red-50 rounded-full">
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Clear All Expense Data</h4>
+                      <p className="mt-1 text-sm text-gray-500">
+                        This will permanently delete all your expense records. This action cannot be undone.
+                      </p>
+                      <button
+                        onClick={handleClearData}
+                        disabled={clearDataLoading}
+                        className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {clearDataLoading ? 'Clearing...' : 'Clear All Data'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
       <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0">
-        <div className="grid grid-cols-3 h-16">
+        <div className="grid grid-cols-4 h-16">
           <button
             onClick={() => setActiveView('list')}
             className={`flex flex-col items-center justify-center ${
@@ -375,6 +435,15 @@ function App() {
           >
             <PieChart className="w-6 h-6" />
             <span className="text-xs mt-1">Summary</span>
+          </button>
+          <button
+            onClick={() => setActiveView('settings')}
+            className={`flex flex-col items-center justify-center ${
+              activeView === 'settings' ? 'text-indigo-600' : 'text-gray-600'
+            }`}
+          >
+            <Settings className="w-6 h-6" />
+            <span className="text-xs mt-1">Settings</span>
           </button>
         </div>
       </nav>
