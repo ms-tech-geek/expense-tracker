@@ -16,4 +16,17 @@ export type ExpenseCategory = {
 export interface ExpenseSummary {
   total: number;
   byCategory: Record<string, number>;
+  weekly: {
+    labels: string[];
+    data: number[];
+  };
+  monthly: {
+    labels: string[];
+    data: number[];
+  };
+  categoryData: {
+    labels: string[];
+    data: number[];
+    colors: string[];
+  };
 }
