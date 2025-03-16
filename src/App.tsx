@@ -230,13 +230,27 @@ function App() {
   const handleSignOut = async () => {
     if (signOutLoading) return;
     
+    // Reset local state first
+    setExpenses([]);
+    setEditingExpense(null);
+    setActiveView('list');
+    
     setSignOutLoading(true);
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Get current session first
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      } else {
+        // If no session exists, just clear the user state
+        setUser(null);
+      }
     } catch (error) {
       console.error('Error signing out:', error);
-      alert('Failed to sign out. Please try again.');
+      // Even if there's an error, clear the local state
+      setUser(null);
     } finally {
       setSignOutLoading(false);
     }
