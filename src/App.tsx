@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Wallet, Plus, List, LogOut, PieChart, Settings, AlertTriangle } from 'lucide-react';
-import * as Icons from 'lucide-react';
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, startOfMonth, endOfMonth, eachWeekOfInterval } from 'date-fns';
-import { supabase } from './lib/supabase';
+import React, { useState } from 'react';
+import { Wallet } from 'lucide-react';
+import { Header } from './components/Layout/Header';
+import { Navigation } from './components/Layout/Navigation';
+import { SettingsView } from './components/Settings/SettingsView';
 import { ExpenseForm } from './components/ExpenseForm';
 import { ExpenseList } from './components/ExpenseList';
 import { ExpenseSummary } from './components/ExpenseSummary';
-// import { CategoryForm } from './components/CategoryForm';
 import { AuthForm } from './components/AuthForm';
-import { Expense, Category } from './types';
+import { useAuth } from './hooks/useAuth';
+import { useExpenses } from './hooks/useExpenses';
+import { calculateExpenseSummary } from './utils/expenseCalculations';
+import { supabase } from './lib/supabase';
 
 // Default categories with hierarchy
-const DEFAULT_CATEGORIES: Category[] = [
+export const DEFAULT_CATEGORIES = [
   // Housing
   { id: 'housing', user_id: '', name: 'Housing', icon: 'Home', color: 'text-blue-600', created_at: '' },
   { id: 'rent', user_id: '', name: 'Rent', icon: 'Key', color: 'text-blue-500', created_at: '', parent_id: 'housing' },
@@ -101,103 +103,12 @@ const DEFAULT_CATEGORIES: Category[] = [
 ];
 
 function App() {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [categories] = useState<Category[]>(DEFAULT_CATEGORIES);
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, signOutLoading, handleSignOut } = useAuth();
+  const { expenses, addExpense, updateExpense, deleteExpense, setExpenses } = useExpenses(user?.id);
+  const [categories] = useState(DEFAULT_CATEGORIES);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
   const [clearDataLoading, setClearDataLoading] = useState(false);
-  const [signOutLoading, setSignOutLoading] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      loadExpenses();
-    }
-  }, [user]);
-
-  const loadExpenses = async () => {
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('expenses')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (error) {
-      console.error('Error loading expenses:', error);
-      return;
-    }
-
-    setExpenses(data || []);
-  };
-
-  const addExpense = async (newExpense: Omit<Expense, 'id'>) => {
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('expenses')
-      .insert([{
-        ...newExpense,
-        user_id: user.id
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error adding expense:', error);
-      return;
-    }
-
-    setExpenses((prev) => [data, ...prev]);
-  };
-
-  const updateExpense = async (expense: Expense) => {
-    const { error } = await supabase
-      .from('expenses')
-      .update({
-        amount: expense.amount,
-        category: expense.category,
-        description: expense.description,
-        date: expense.date
-      })
-      .eq('id', expense.id);
-
-    if (error) {
-      console.error('Error updating expense:', error);
-      return;
-    }
-
-    setExpenses(prev => prev.map(e => e.id === expense.id ? expense : e));
-    setEditingExpense(null);
-  };
-
-  const deleteExpense = async (id: string) => {
-    const { error } = await supabase
-      .from('expenses')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting expense:', error);
-      return;
-    }
-
-    setExpenses(prev => prev.filter(e => e.id !== id));
-  };
 
   const handleClearData = async () => {
     if (!user) return;
@@ -227,103 +138,7 @@ function App() {
     }
   };
 
-  const handleSignOut = async () => {
-    if (signOutLoading) return;
-    
-    // Reset local state first
-    setExpenses([]);
-    setEditingExpense(null);
-    setActiveView('list');
-    
-    setSignOutLoading(true);
-    try {
-      // Get current session first
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-      } else {
-        // If no session exists, just clear the user state
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Error signing out:', error);
-      // Even if there's an error, clear the local state
-      setUser(null);
-    } finally {
-      setSignOutLoading(false);
-    }
-  };
-
-  const summary = {
-    total: expenses.reduce((sum, exp) => sum + exp.amount, 0),
-    byCategory: expenses.reduce((acc, exp) => {
-      const cat = categories.find(c => c.id === exp.category);
-      if (cat) {
-        acc[cat.id] = (acc[cat.id] || 0) + exp.amount;
-      }
-      return acc;
-    }, {} as Record<string, number>),
-    weekly: getWeeklyData(expenses),
-    monthly: getMonthlyData(expenses),
-    categoryData: getCategoryData(expenses),
-  };
-
-  function getWeeklyData(expenses: Expense[]) {
-    const start = startOfWeek(new Date());
-    const end = endOfWeek(new Date());
-    const days = eachDayOfInterval({ start, end });
-    
-    const labels = days.map(day => format(day, 'EEE'));
-    const data = days.map(day => {
-      return expenses
-        .filter(exp => {
-          const expDate = new Date(exp.date);
-          return format(expDate, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd');
-        })
-        .reduce((sum, exp) => sum + exp.amount, 0);
-    });
-
-    return { labels, data };
-  }
-
-  function getMonthlyData(expenses: Expense[]) {
-    const start = startOfMonth(new Date());
-    const end = endOfMonth(new Date());
-    const weeks = eachWeekOfInterval({ start, end });
-    
-    const labels = weeks.map(week => `Week ${format(week, 'w')}`);
-    const data = weeks.map(weekStart => {
-      const weekEnd = endOfWeek(weekStart);
-      return expenses
-        .filter(exp => {
-          const expDate = new Date(exp.date);
-          return expDate >= weekStart && expDate <= weekEnd;
-        })
-        .reduce((sum, exp) => sum + exp.amount, 0);
-    });
-
-    return { labels, data };
-  }
-
-  function getCategoryData(expenses: Expense[]) {
-    const categoryTotals = expenses.reduce((acc, exp) => {
-      acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const sortedCategories = Object.entries(categoryTotals)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5);
-
-    return {
-      labels: sortedCategories.map(([id]) => 
-        categories.find(c => c.id === id)?.name || id
-      ),
-      data: sortedCategories.map(([, amount]) => amount)
-    };
-  }
+  const summary = calculateExpenseSummary(expenses, categories);
 
   if (loading) {
     return (
@@ -339,24 +154,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white shadow-sm py-4 px-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="bg-indigo-600 p-2 rounded-full">
-            <Wallet className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Expense Tracker</h1>
-            <p className="text-sm text-gray-600">by Ms Tech Geek</p>
-          </div>
-        </div>
-        <button
-          onClick={handleSignOut}
-          disabled={signOutLoading}
-          className="text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <LogOut className={`w-5 h-5 ${signOutLoading ? 'animate-pulse' : ''}`} />
-        </button>
-      </header>
+      <Header onSignOut={handleSignOut} signOutLoading={signOutLoading} />
 
       <main className="flex-1 overflow-y-auto">
         <div className="h-full">
@@ -402,82 +200,11 @@ function App() {
             </div>
           )}
 
-          {activeView === 'settings' && (
-            <div className="p-4 space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
-              
-              <div className="bg-white rounded-lg shadow p-4 space-y-4">
-                <h3 className="font-medium text-gray-900">Data Management</h3>
-                
-                <div className="border-t pt-4">
-                  <div className="flex items-start space-x-4 text-left">
-                    <div className="p-2 bg-red-50 rounded-full">
-                      <AlertTriangle className="w-5 h-5 text-red-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">Clear All Expense Data</h4>
-                      <p className="mt-1 text-sm text-gray-500">
-                        This will permanently delete all your expense records. This action cannot be undone.
-                      </p>
-                      <button
-                        onClick={handleClearData}
-                        disabled={clearDataLoading}
-                        className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {clearDataLoading ? 'Clearing...' : 'Clear All Data'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeView === 'settings' && <SettingsView onClearData={handleClearData} clearDataLoading={clearDataLoading} />}
         </div>
       </main>
 
-      <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0">
-        <div className="grid grid-cols-4 h-16">
-          <button
-            onClick={() => setActiveView('list')}
-            className={`flex flex-col items-center justify-center ${
-              activeView === 'list' ? 'text-indigo-600' : 'text-gray-600'
-            }`}
-          >
-            <List className="w-6 h-6" />
-            <span className="text-xs mt-1">Expenses</span>
-          </button>
-          <button
-            onClick={() => {
-              setEditingExpense(null);
-              setActiveView('add');
-            }}
-            className={`flex flex-col items-center justify-center ${
-              activeView === 'add' ? 'text-indigo-600' : 'text-gray-600'
-            }`}
-          >
-            <Plus className="w-6 h-6" />
-            <span className="text-xs mt-1">Add</span>
-          </button>
-          <button
-            onClick={() => setActiveView('summary')}
-            className={`flex flex-col items-center justify-center ${
-              activeView === 'summary' ? 'text-indigo-600' : 'text-gray-600'
-            }`}
-          >
-            <PieChart className="w-6 h-6" />
-            <span className="text-xs mt-1">Summary</span>
-          </button>
-          <button
-            onClick={() => setActiveView('settings')}
-            className={`flex flex-col items-center justify-center ${
-              activeView === 'settings' ? 'text-indigo-600' : 'text-gray-600'
-            }`}
-          >
-            <Settings className="w-6 h-6" />
-            <span className="text-xs mt-1">Settings</span>
-          </button>
-        </div>
-      </nav>
+      <Navigation activeView={activeView} onViewChange={setActiveView} />
     </div>
   );
 }
