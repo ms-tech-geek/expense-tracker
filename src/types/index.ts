@@ -21,11 +21,7 @@ export interface Category {
 export interface ExpenseSummary {
   total: number;
   byCategory: Record<string, number>;
-  weekly: {
-    labels: string[];
-    data: number[];
-  };
-  monthly: {
+  timeData: {
     labels: string[];
     data: number[];
   };
@@ -34,4 +30,16 @@ export interface ExpenseSummary {
     data: number[];
     colors: string[];
   };
+}
+
+export type DateRange = 
+  | 'last-week'
+  | 'last-month'
+  | 'last-quarter'
+  | 'last-year'
+  | 'custom';
+
+export interface DateRangeOption {
+  label: string;
+  value: DateRange;
 }

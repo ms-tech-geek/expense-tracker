@@ -13,13 +13,40 @@ import { supabase } from './lib/supabase';
 function useAppState() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
+  const [dateRange, setDateRange] = useState<DateRange>('last-week');
+  const [customDateRange, setCustomDateRange] = useState<{ start: Date | null; end: Date | null }>({
+    start: null,
+    end: null
+  });
   const [clearDataLoading, setClearDataLoading] = useState(false);
-  return { editingExpense, setEditingExpense, activeView, setActiveView, clearDataLoading, setClearDataLoading };
+  return { 
+    editingExpense, 
+    setEditingExpense, 
+    activeView, 
+    setActiveView, 
+    dateRange,
+    setDateRange,
+    customDateRange,
+    setCustomDateRange,
+    clearDataLoading, 
+    setClearDataLoading 
+  };
 }
 
 function App() {
   const { user, loading, signOutLoading, deleteAccountLoading, handleSignOut, handleDeleteAccount } = useAuth();
-  const { editingExpense, setEditingExpense, activeView, setActiveView, clearDataLoading, setClearDataLoading } = useAppState();
+  const { 
+    editingExpense, 
+    setEditingExpense, 
+    activeView, 
+    setActiveView,
+    dateRange,
+    setDateRange,
+    customDateRange,
+    setCustomDateRange,
+    clearDataLoading, 
+    setClearDataLoading 
+  } = useAppState();
   const { expenses, addExpense, updateExpense, deleteExpense, setExpenses } = useExpenses(user?.id);
   const { categories } = useCategories();
 
@@ -51,7 +78,13 @@ function App() {
     }
   };
 
-  const summary = calculateExpenseSummary(expenses, categories);
+  const summary = calculateExpenseSummary(
+    expenses, 
+    categories, 
+    dateRange,
+    customDateRange.start,
+    customDateRange.end
+  );
 
   if (loading) {
     return (
@@ -109,7 +142,14 @@ function App() {
 
           {activeView === 'summary' && (
             <div className="p-4">
-              <ExpenseSummary summary={summary} categories={categories} />
+              <ExpenseSummary 
+                summary={summary} 
+                categories={categories}
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+                customDateRange={customDateRange}
+                onCustomDateRangeChange={(start, end) => setCustomDateRange({ start, end })}
+              />
             </div>
           )}
 
