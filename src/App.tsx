@@ -11,7 +11,7 @@ import { calculateExpenseSummary } from './utils/expenseCalculations';
 import { supabase } from './lib/supabase';
 
 function App() {
-  const { user, loading, signOutLoading, handleSignOut } = useAuth();
+  const { user, loading, signOutLoading, deleteAccountLoading, handleSignOut, handleDeleteAccount } = useAuth();
   const { expenses, addExpense, updateExpense, deleteExpense, setExpenses } = useExpenses(user?.id);
   const { categories } = useCategories();
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -108,7 +108,16 @@ function App() {
             </div>
           )}
 
-          {activeView === 'settings' && <SettingsView onClearData={handleClearData} clearDataLoading={clearDataLoading} />}
+          {activeView === 'settings' && (
+            <SettingsView
+              onClearData={handleClearData}
+              clearDataLoading={clearDataLoading}
+              onDeleteAccount={() => handleDeleteAccount({
+                onError: (error) => alert(error.message)
+              })}
+              deleteAccountLoading={deleteAccountLoading}
+            />
+          )}
         </div>
       </main>
 
