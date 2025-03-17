@@ -1,7 +1,8 @@
 import React from 'react';
 import { Expense, Category } from '../../types';
 import * as Icons from 'lucide-react';
-import { Pencil, Trash2, Info, ChevronUp, ChevronDown } from 'lucide-react';
+import { Pencil, Trash2, Info, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
+import { ExpenseSearch, SearchFilters } from './ExpenseSearch';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -11,6 +12,15 @@ interface ExpenseListProps {
 }
 
 export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseListProps) {
+  const [searchFilters, setSearchFilters] = React.useState<SearchFilters>({
+    query: '',
+    category: '',
+    startDate: '',
+    endDate: '',
+    minAmount: '',
+    maxAmount: ''
+  });
+
   const [sortConfig, setSortConfig] = React.useState<{
     key: 'expense_date' | 'amount';
     direction: 'asc' | 'desc';
@@ -19,8 +29,30 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
     direction: 'desc'
   });
 
+  const filteredExpenses = React.useMemo(() => {
+    return expenses.filter(expense => {
+      const matchesQuery = !searchFilters.query || 
+        expense.description?.toLowerCase().includes(searchFilters.query.toLowerCase());
+      
+      const matchesCategory = !searchFilters.category || 
+        expense.category === searchFilters.category;
+      
+      const matchesDateRange = (!searchFilters.startDate || 
+        new Date(expense.expense_date) >= new Date(searchFilters.startDate)) &&
+        (!searchFilters.endDate || 
+        new Date(expense.expense_date) <= new Date(searchFilters.endDate));
+      
+      const matchesAmountRange = (!searchFilters.minAmount || 
+        expense.amount >= parseFloat(searchFilters.minAmount)) &&
+        (!searchFilters.maxAmount || 
+        expense.amount <= parseFloat(searchFilters.maxAmount));
+      
+      return matchesQuery && matchesCategory && matchesDateRange && matchesAmountRange;
+    });
+  }, [expenses, searchFilters]);
+
   const sortedExpenses = React.useMemo(() => {
-    const sorted = [...expenses];
+    const sorted = [...filteredExpenses];
     sorted.sort((a, b) => {
       if (sortConfig.key === 'expense_date') {
         const dateA = new Date(a.expense_date).getTime();
@@ -31,7 +63,7 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
       }
     });
     return sorted;
-  }, [expenses, sortConfig]);
+  }, [filteredExpenses, sortConfig]);
 
   const handleSort = (key: 'expense_date' | 'amount') => {
     setSortConfig(current => ({
@@ -72,6 +104,20 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
 
   return (
     <div className="divide-y divide-gray-100">
+      <ExpenseSearch
+        filters={searchFilters}
+        onFilterChange={setSearchFilters}
+        categories={categories}
+        onReset={() => setSearchFilters({
+          query: '',
+          category: '',
+          startDate: '',
+          endDate: '',
+          minAmount: '',
+          maxAmount: ''
+        })}
+      />
+
       <div className="bg-white px-4 py-2 flex items-center justify-between border-b">
         <h2 className="text-sm font-medium text-gray-700">Expenses</h2>
         <div className="flex items-center gap-4 text-sm">
@@ -108,7 +154,8 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
           </button>
         </div>
       </div>
-      {sortedExpenses.map((expense) => (
+      {sortedExpenses.length > 0 ? (
+        sortedExpenses.map((expense) => (
         <div
           key={expense.id}
           className="bg-white px-4 py-3 group hover:bg-gray-50 transition-colors"
@@ -170,7 +217,17 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
             </div>
           </div>
         </div>
-      ))}
+        ))
+      ) : (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+          <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
+          <p className="text-gray-500">
+            {expenses.length === 0 
+              ? "No expenses yet. Add your first expense!"
+              : "No expenses match your search criteria."}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
