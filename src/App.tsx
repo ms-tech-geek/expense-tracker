@@ -10,13 +10,18 @@ import { AuthForm } from './components/Auth';
 import { calculateExpenseSummary } from './utils/expenseCalculations';
 import { supabase } from './lib/supabase';
 
-function App() {
-  const { user, loading, signOutLoading, deleteAccountLoading, handleSignOut, handleDeleteAccount } = useAuth();
-  const { expenses, addExpense, updateExpense, deleteExpense, setExpenses } = useExpenses(user?.id);
-  const { categories } = useCategories();
+function useAppState() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
   const [clearDataLoading, setClearDataLoading] = useState(false);
+  return { editingExpense, setEditingExpense, activeView, setActiveView, clearDataLoading, setClearDataLoading };
+}
+
+function App() {
+  const { user, loading, signOutLoading, deleteAccountLoading, handleSignOut, handleDeleteAccount } = useAuth();
+  const { editingExpense, setEditingExpense, activeView, setActiveView, clearDataLoading, setClearDataLoading } = useAppState();
+  const { expenses, addExpense, updateExpense, deleteExpense, setExpenses } = useExpenses(user?.id);
+  const { categories } = useCategories();
 
   const handleClearData = async () => {
     if (!user) return;
