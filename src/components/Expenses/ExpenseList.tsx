@@ -2,7 +2,7 @@ import React from 'react';
 import { Expense, Category } from '../../types';
 import * as Icons from 'lucide-react';
 import { Pencil, Trash2, Info, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
-import { ExpenseSearch, SearchFilters } from './ExpenseSearch';
+import { ExpenseSearch } from './ExpenseSearch';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -12,14 +12,7 @@ interface ExpenseListProps {
 }
 
 export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseListProps) {
-  const [searchFilters, setSearchFilters] = React.useState<SearchFilters>({
-    query: '',
-    category: '',
-    startDate: '',
-    endDate: '',
-    minAmount: '',
-    maxAmount: ''
-  });
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   const [sortConfig, setSortConfig] = React.useState<{
     key: 'expense_date' | 'amount';
@@ -31,25 +24,21 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
 
   const filteredExpenses = React.useMemo(() => {
     return expenses.filter(expense => {
-      const matchesQuery = !searchFilters.query || 
-        expense.description?.toLowerCase().includes(searchFilters.query.toLowerCase());
-      
-      const matchesCategory = !searchFilters.category || 
-        expense.category === searchFilters.category;
-      
-      const matchesDateRange = (!searchFilters.startDate || 
-        new Date(expense.expense_date) >= new Date(searchFilters.startDate)) &&
-        (!searchFilters.endDate || 
-        new Date(expense.expense_date) <= new Date(searchFilters.endDate));
-      
-      const matchesAmountRange = (!searchFilters.minAmount || 
-        expense.amount >= parseFloat(searchFilters.minAmount)) &&
-        (!searchFilters.maxAmount || 
-        expense.amount <= parseFloat(searchFilters.maxAmount));
-      
-      return matchesQuery && matchesCategory && matchesDateRange && matchesAmountRange;
+      if (!searchQuery) return true;
+
+      const query = searchQuery.toLowerCase();
+      const category = categories.find(c => c.id === expense.category);
+      const date = new Date(expense.expense_date).toLocaleDateString();
+      const amount = expense.amount.toString();
+
+      return (
+        expense.description?.toLowerCase().includes(query) ||
+        category?.name.toLowerCase().includes(query) ||
+        date.toLowerCase().includes(query) ||
+        amount.includes(query)
+      );
     });
-  }, [expenses, searchFilters]);
+  }, [expenses, searchQuery, categories]);
 
   const sortedExpenses = React.useMemo(() => {
     const sorted = [...filteredExpenses];
@@ -105,17 +94,9 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
   return (
     <div className="divide-y divide-gray-100">
       <ExpenseSearch
-        filters={searchFilters}
-        onFilterChange={setSearchFilters}
-        categories={categories}
-        onReset={() => setSearchFilters({
-          query: '',
-          category: '',
-          startDate: '',
-          endDate: '',
-          minAmount: '',
-          maxAmount: ''
-        })}
+        query={searchQuery}
+        onQueryChange={setSearchQuery}
+        onReset={() => setSearchQuery('')}
       />
 
       <div className="bg-white px-4 py-2 flex items-center justify-between border-b">
