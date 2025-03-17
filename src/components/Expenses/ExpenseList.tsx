@@ -1,7 +1,7 @@
 import React from 'react';
 import { Expense, Category } from '../../types';
 import * as Icons from 'lucide-react';
-import { Pencil, Trash2, Clock } from 'lucide-react';
+import { Pencil, Trash2, Info, ArrowUpDown } from 'lucide-react';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -11,6 +11,35 @@ interface ExpenseListProps {
 }
 
 export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseListProps) {
+  const [sortConfig, setSortConfig] = React.useState<{
+    key: 'expense_date' | 'amount';
+    direction: 'asc' | 'desc';
+  }>({
+    key: 'expense_date',
+    direction: 'desc'
+  });
+
+  const sortedExpenses = React.useMemo(() => {
+    const sorted = [...expenses];
+    sorted.sort((a, b) => {
+      if (sortConfig.key === 'expense_date') {
+        const dateA = new Date(a.expense_date).getTime();
+        const dateB = new Date(b.expense_date).getTime();
+        return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+      } else {
+        return sortConfig.direction === 'asc' ? a.amount - b.amount : b.amount - a.amount;
+      }
+    });
+    return sorted;
+  }, [expenses, sortConfig]);
+
+  const handleSort = (key: 'expense_date' | 'amount') => {
+    setSortConfig(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -43,7 +72,31 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
 
   return (
     <div className="divide-y divide-gray-100">
-      {expenses.map((expense) => (
+      <div className="bg-white px-4 py-3 flex justify-end space-x-2">
+        <button
+          onClick={() => handleSort('expense_date')}
+          className={`flex items-center px-3 py-1.5 text-sm rounded-md transition-colors ${
+            sortConfig.key === 'expense_date'
+              ? 'bg-indigo-50 text-indigo-600'
+              : 'text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          <ArrowUpDown className="w-4 h-4 mr-1" />
+          Date {sortConfig.key === 'expense_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+        </button>
+        <button
+          onClick={() => handleSort('amount')}
+          className={`flex items-center px-3 py-1.5 text-sm rounded-md transition-colors ${
+            sortConfig.key === 'amount'
+              ? 'bg-indigo-50 text-indigo-600'
+              : 'text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          <ArrowUpDown className="w-4 h-4 mr-1" />
+          Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+        </button>
+      </div>
+      {sortedExpenses.map((expense) => (
         <div
           key={expense.id}
           className="bg-white px-4 py-3 group hover:bg-gray-50 transition-colors"
@@ -68,7 +121,20 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
                     {expense.description && ` • ${expense.description}`}
                   </p>
                 </div>
-                <div className="flex items-center space-x-1 ml-2 shrink-0">
+                <div className="flex items-center space-x-2 ml-2 shrink-0">
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      className="p-1 text-gray-400 hover:text-indigo-600 rounded-md transition-colors"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
+                    <div className="absolute right-0 top-full mt-1 w-48 p-2 bg-gray-800 text-xs text-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                      <p className="mb-1">
+                        {getTimestamp(expense).isUpdated ? 'Last updated' : 'Added'}: {getTimestamp(expense).text}
+                      </p>
+                    </div>
+                  </div>
                   <button
                     onClick={() => onEdit(expense)}
                     className="p-1 text-gray-400 hover:text-indigo-600 rounded-md transition-colors"
@@ -88,12 +154,6 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-              <div className="flex items-center mt-0.5 text-xs text-gray-400">
-                <Clock className="w-3 h-3 mr-1" />
-                <span className="truncate">
-                  {getTimestamp(expense).isUpdated ? 'Updated' : 'Added'}: {getTimestamp(expense).text}
-                </span>
               </div>
             </div>
           </div>
