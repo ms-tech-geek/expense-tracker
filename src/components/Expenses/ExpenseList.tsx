@@ -46,46 +46,46 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
       {expenses.map((expense) => (
         <div
           key={expense.id}
-          className="bg-white p-4 flex items-center justify-between group hover:bg-gray-50 transition-colors"
+          className="bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between group hover:bg-gray-50 transition-colors"
         >
-          <div className="flex items-center space-x-4">
-            <div className="p-2.5 bg-gray-100/50 rounded-xl shadow-sm">
-              {getCategoryIcon(expense.category)}
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <p className="font-medium text-gray-900">
+          <div className="flex items-start justify-between w-full sm:w-auto">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-gray-100/50 rounded-xl shadow-sm shrink-0">
+                {getCategoryIcon(expense.category)}
+              </div>
+              <div className="min-w-0">
+                <p className="font-medium text-gray-900 truncate">
                   {categories.find((c) => c.id === expense.category)?.name}
                 </p>
-                <span className="text-sm text-gray-500">•</span>
-                <p className="text-sm text-gray-500">
-                  {formatDate(expense.expense_date)}
-                </p>
-              </div>
-              {expense.description && (
-                <p className="text-sm text-gray-500">{expense.description}</p>
-              )}
-              {/* Timestamp info */}
-              <div className="flex items-center mt-1 text-xs text-gray-400">
-                <Clock className="w-3 h-3 mr-1" />
-                <span>
-                  {getTimestamp(expense).isUpdated ? 'Updated' : 'Added'}: {getTimestamp(expense).text}
-                </span>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <p className="text-sm text-gray-500">
+                    {formatDate(expense.expense_date)}
+                  </p>
+                </div>
+                {expense.description && (
+                  <p className="text-sm text-gray-500 truncate mt-0.5">{expense.description}</p>
+                )}
+                <div className="flex items-center mt-1 text-xs text-gray-400">
+                  <Clock className="w-3 h-3 mr-1" />
+                  <span className="truncate">
+                    {getTimestamp(expense).isUpdated ? 'Updated' : 'Added'}: {getTimestamp(expense).text}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-6">
-            <div className="text-right min-w-[100px]">
+          <div className="flex items-center justify-end space-x-4 mt-4 sm:mt-0">
+            <div className="hidden sm:block text-right">
               <p className="text-lg font-semibold text-gray-900">
                 ₹{expense.amount.toFixed(2)}
               </p>
             </div>
-            <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex space-x-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => {
                   onEdit(expense);
                 }}
-                className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                 title="Edit expense"
               >
                 <Pencil className="w-5 h-5" />
@@ -96,7 +96,7 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
                     onDelete(expense.id);
                   }
                 }}
-                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                 title="Delete expense"
               >
                 <Trash2 className="w-5 h-5" />
