@@ -1,7 +1,7 @@
 import React from 'react';
 import { Expense, Category } from '../../types';
 import * as Icons from 'lucide-react';
-import { Pencil, Trash2, Info, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
+import { Pencil, Trash2, Info, ChevronUp, ChevronDown, AlertCircle, X } from 'lucide-react';
 import { ExpenseSearch } from './ExpenseSearch';
 
 interface ExpenseListProps {
@@ -13,6 +13,7 @@ interface ExpenseListProps {
 
 export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseListProps) {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [activeTooltip, setActiveTooltip] = React.useState<string | null>(null);
 
   const [sortConfig, setSortConfig] = React.useState<{
     key: 'expense_date' | 'amount';
@@ -162,18 +163,25 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
                   </p>
                 </div>
                 <div className="flex items-center space-x-2 ml-2 shrink-0">
-                  <div className="relative group">
+                  <div className="relative">
                     <button
                       type="button"
-                      className="p-1 text-gray-400 hover:text-indigo-600 rounded-md transition-colors"
+                      onClick={() => setActiveTooltip(activeTooltip === expense.id ? null : expense.id)}
+                      className={`p-1 rounded-md transition-colors ${
+                        activeTooltip === expense.id ? 'text-indigo-600' : 'text-gray-400 hover:text-indigo-600'
+                      }`}
                     >
                       <Info className="w-4 h-4" />
                     </button>
-                    <div className="absolute right-0 top-full mt-1 w-48 p-2 bg-gray-800 text-xs text-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                      <p className="mb-1">
-                        {getTimestamp(expense).isUpdated ? 'Last updated' : 'Added'}: {getTimestamp(expense).text}
-                      </p>
-                    </div>
+                    {activeTooltip === expense.id && (
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-gray-800 text-xs text-white rounded-md shadow-lg z-10">
+                        <div className="p-2">
+                          <p>
+                            {getTimestamp(expense).isUpdated ? 'Last updated' : 'Added'}: {getTimestamp(expense).text}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={() => onEdit(expense)}
