@@ -1,7 +1,7 @@
 import React from 'react';
 import { Expense, Category } from '../../types';
 import * as Icons from 'lucide-react';
-import { Pencil, Trash2, Info, ArrowUpDown } from 'lucide-react';
+import { Pencil, Trash2, Info, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -72,29 +72,41 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
 
   return (
     <div className="divide-y divide-gray-100">
-      <div className="bg-white px-4 py-3 flex justify-end space-x-2">
-        <button
-          onClick={() => handleSort('expense_date')}
-          className={`flex items-center px-3 py-1.5 text-sm rounded-md transition-colors ${
-            sortConfig.key === 'expense_date'
-              ? 'bg-indigo-50 text-indigo-600'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          <ArrowUpDown className="w-4 h-4 mr-1" />
-          Date {sortConfig.key === 'expense_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-        </button>
-        <button
-          onClick={() => handleSort('amount')}
-          className={`flex items-center px-3 py-1.5 text-sm rounded-md transition-colors ${
-            sortConfig.key === 'amount'
-              ? 'bg-indigo-50 text-indigo-600'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          <ArrowUpDown className="w-4 h-4 mr-1" />
-          Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-        </button>
+      <div className="bg-white px-4 py-2 flex items-center justify-between border-b">
+        <h2 className="text-sm font-medium text-gray-700">Expenses</h2>
+        <div className="flex items-center gap-4 text-sm">
+          <button
+            onClick={() => handleSort('expense_date')}
+            className={`group flex items-center gap-1 ${
+              sortConfig.key === 'expense_date' ? 'text-indigo-600' : 'text-gray-600'
+            }`}
+          >
+            <span className="group-hover:text-indigo-600 transition-colors">Date</span>
+            {sortConfig.key === 'expense_date' ? (
+              sortConfig.direction === 'asc' ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )
+            ) : null}
+          </button>
+          <span className="text-gray-300">|</span>
+          <button
+            onClick={() => handleSort('amount')}
+            className={`group flex items-center gap-1 ${
+              sortConfig.key === 'amount' ? 'text-indigo-600' : 'text-gray-600'
+            }`}
+          >
+            <span className="group-hover:text-indigo-600 transition-colors">Amount</span>
+            {sortConfig.key === 'amount' ? (
+              sortConfig.direction === 'asc' ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )
+            ) : null}
+          </button>
+        </div>
       </div>
       {sortedExpenses.map((expense) => (
         <div
