@@ -1,29 +1,63 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, Wallet } from 'lucide-react';
+import { LogIn, UserPlus, Wallet, AlertCircle, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+
+interface ValidationErrors {
+  email?: string;
+  password?: string;
+}
 
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [loading, setLoading] = useState(false);
 
-  const validateForm = () => {
-    if (!email.trim() || !password.trim()) {
-      setError('Email and password are required');
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+    
+    // Email validation
+    if (!email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    // Password validation
+    if (!password.trim()) {
+      errors.password = 'Password is required';
+    } else if (!isLogin && password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    } else if (!isLogin && !/(?=.*[a-z])(?=.*[0-9])/.test(password)) {
+      errors.password = 'Password must contain both letters and numbers';
+    }
+
+    setValidationErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setError(null);
       return false;
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return false;
-    }
+    
+    setValidationErrors({});
     return true;
+  };
+
+  const handleInputChange = (field: 'email' | 'password', value: string) => {
+    if (field === 'email') {
+      setEmail(value);
+    } else {
+      setPassword(value);
+    }
+    setError(null);
+    setValidationErrors({});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setValidationErrors({});
     
     if (!validateForm()) {
       return;
@@ -101,10 +135,20 @@ export function AuthForm() {
                 required
                 value={email}
                 autoComplete="email"
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className={`mt-1 block w-full rounded-lg shadow-sm 
+                  ${validationErrors.email 
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+                  }`}
                 placeholder="you@example.com"
               />
+              {validationErrors.email && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {validationErrors.email}
+                </p>
+              )}
             </div>
 
             <div>
@@ -118,20 +162,32 @@ export function AuthForm() {
                 value={password}
                 autoComplete={isLogin ? "current-password" : "new-password"}
                 minLength={6}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                className={`mt-1 block w-full rounded-lg shadow-sm 
+                  ${validationErrors.password 
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+                  }`}
                 placeholder="••••••"
               />
+              {validationErrors.password && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {validationErrors.password}
+                </p>
+              )}
               {!isLogin && (
-                <p className="mt-1 text-xs text-gray-500">
-                  Must be at least 6 characters
+                <p className="mt-1 text-xs text-gray-500 flex items-center">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Must contain at least 6 characters with letters and numbers
                 </p>
               )}
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-100 rounded-lg">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-center">
+                <AlertCircle className="w-5 h-5 text-red-500 mr-2 flex-shrink-0" />
+                <p className="text-sm text-red-600 flex-1">{error}</p>
               </div>
             )}
 
@@ -141,7 +197,10 @@ export function AuthForm() {
               className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {loading ? (
-                'Processing...'
+                <div className="flex items-center">
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  {isLogin ? 'Signing in...' : 'Creating account...'}
+                </div>
               ) : isLogin ? (
                 <>
                   <LogIn className="w-5 h-5 mr-2" />
