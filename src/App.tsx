@@ -15,8 +15,8 @@ function useAppState() {
   const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
   const [dateRange, setDateRange] = useState<DateRange>('last-week');
   const [customDateRange, setCustomDateRange] = useState<{ start: Date | null; end: Date | null }>({
-    start: null,
-    end: null
+    start: new Date(new Date().setDate(new Date().getDate() - 7)),
+    end: new Date()
   });
   const [clearDataLoading, setClearDataLoading] = useState(false);
   return { 

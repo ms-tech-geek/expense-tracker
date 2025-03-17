@@ -34,6 +34,8 @@ function getDateRangeConfig(range: DateRange, customStart?: Date, customEnd?: Da
   let formatInterval: (date: Date) => string;
   let getIntervals: (start: Date, end: Date) => Date[];
 
+  const today = endOfDay(new Date());
+
   switch (range) {
     case 'last-week':
       start = startOfDay(subDays(end, 6));
@@ -56,10 +58,9 @@ function getDateRangeConfig(range: DateRange, customStart?: Date, customEnd?: Da
       getIntervals = (start, end) => eachMonthOfInterval({ start, end });
       break;
     case 'custom':
-      if (!customStart || !customEnd) {
-        throw new Error('Custom date range requires start and end dates');
-      }
-      start = startOfDay(customStart);
+      // Default to last 7 days if no custom dates are provided
+      start = startOfDay(customStart || subDays(today, 6));
+      end = endOfDay(customEnd || today);
       formatInterval = (date) => format(date, 'MMM d');
       getIntervals = (start, end) => {
         const dayDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
