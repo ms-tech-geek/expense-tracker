@@ -33,6 +33,7 @@ function getDateRangeConfig(range: DateRange, customStart?: Date, customEnd?: Da
   let start: Date;
   let formatInterval: (date: Date) => string;
   let getIntervals: (start: Date, end: Date) => Date[];
+  let intervalEnd: (date: Date) => Date;
 
   const today = endOfDay(new Date());
 
@@ -41,37 +42,65 @@ function getDateRangeConfig(range: DateRange, customStart?: Date, customEnd?: Da
       start = startOfDay(subDays(end, 6));
       formatInterval = (date) => format(date, 'EEE');
       getIntervals = eachDayOfInterval;
+      intervalEnd = endOfDay;
       break;
     case 'last-month':
       start = startOfDay(subDays(end, 29));
       formatInterval = (date) => format(date, 'MMM d');
-      getIntervals = (start, end) => eachWeekOfInterval({ start, end });
+      getIntervals = eachDayOfInterval;
+      intervalEnd = endOfDay;
       break;
     case 'last-quarter':
       start = startOfDay(subQuarters(end, 1));
       formatInterval = (date) => format(date, 'MMM');
       getIntervals = (start, end) => eachMonthOfInterval({ start, end });
+      intervalEnd = (date) => {
+        const nextMonth = new Date(date);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        nextMonth.setDate(0);
+        return endOfDay(nextMonth);
+      };
       break;
     case 'last-year':
       start = startOfDay(subYears(end, 1));
       formatInterval = (date) => format(date, 'MMM');
       getIntervals = (start, end) => eachMonthOfInterval({ start, end });
+      intervalEnd = (date) => {
+        const nextMonth = new Date(date);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        nextMonth.setDate(0);
+        return endOfDay(nextMonth);
+      };
       break;
     case 'custom':
       // Default to last 7 days if no custom dates are provided
       start = startOfDay(customStart || subDays(today, 6));
       end = endOfDay(customEnd || today);
       formatInterval = (date) => format(date, 'MMM d');
-      getIntervals = (start, end) => {
-        const dayDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-        return dayDiff <= 31 
-          ? eachDayOfInterval({ start, end })
-          : eachWeekOfInterval({ start, end });
-      };
+      const dayDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      if (dayDiff <= 31) {
+        getIntervals = eachDayOfInterval;
+        intervalEnd = endOfDay;
+      } else if (dayDiff <= 90) {
+        getIntervals = (start, end) => eachWeekOfInterval({ start, end });
+        intervalEnd = (date) => {
+          const nextWeek = new Date(date);
+          nextWeek.setDate(nextWeek.getDate() + 6);
+          return endOfDay(nextWeek);
+        };
+      } else {
+        getIntervals = (start, end) => eachMonthOfInterval({ start, end });
+        intervalEnd = (date) => {
+          const nextMonth = new Date(date);
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          nextMonth.setDate(0);
+          return endOfDay(nextMonth);
+        };
+      }
       break;
   }
 
-  return { start, end, formatInterval, getIntervals };
+  return { start, end, formatInterval, getIntervals, intervalEnd };
 }
 
 export function calculateExpenseSummary(
@@ -81,7 +110,7 @@ export function calculateExpenseSummary(
   customStart?: Date,
   customEnd?: Date
 ): ExpenseSummary {
-  const { start, end, formatInterval, getIntervals } = getDateRangeConfig(dateRange, customStart, customEnd);
+  const { start, end, formatInterval, getIntervals, intervalEnd } = getDateRangeConfig(dateRange, customStart, customEnd);
   
   const filteredExpenses = expenses.filter(exp => {
     const expDate = new Date(exp.expense_date);
@@ -97,7 +126,7 @@ export function calculateExpenseSummary(
       }
       return acc;
     }, {} as Record<string, number>),
-    timeData: getTimeSeriesData(filteredExpenses, start, end, formatInterval, getIntervals),
+    timeData: getTimeSeriesData(filteredExpenses, start, end, formatInterval, getIntervals, intervalEnd),
     categoryData: getCategoryData(filteredExpenses, categories),
   };
 }
@@ -107,19 +136,19 @@ function getTimeSeriesData(
   start: Date,
   end: Date,
   formatInterval: (date: Date) => string,
-  getIntervals: (start: Date, end: Date) => Date[]
+  getIntervals: (start: Date, end: Date) => Date[],
+  intervalEnd: (date: Date) => Date
 ) {
   const intervals = getIntervals(start, end);
   
   const labels = intervals.map(interval => formatInterval(interval));
   const data = intervals.map(intervalStart => {
-    const intervalEnd = new Date(intervalStart);
-    intervalEnd.setHours(23, 59, 59, 999);
+    const endDate = intervalEnd(intervalStart);
 
     return expenses
       .filter(exp => {
         const expDate = new Date(exp.expense_date);
-        return expDate >= intervalStart && expDate <= intervalEnd;
+        return expDate >= intervalStart && expDate <= endDate;
       })
       .reduce((sum, exp) => sum + exp.amount, 0);
   });

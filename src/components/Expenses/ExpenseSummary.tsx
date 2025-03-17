@@ -148,12 +148,20 @@ export function ExpenseSummary({
                 legend: {
                   display: false,
                 },
+                tooltip: {
+                  callbacks: {
+                    label: (context) => {
+                      const value = context.raw as number;
+                      return `₹${value.toFixed(2)}`;
+                    }
+                  }
+                },
               },
               scales: {
                 y: {
                   beginAtZero: true,
                   ticks: {
-                    callback: (value) => `₹${value}`,
+                    callback: (value) => `₹${Number(value).toFixed(2)}`,
                   },
                 },
               },
@@ -194,6 +202,16 @@ export function ExpenseSummary({
                     usePointStyle: true,
                     boxWidth: 12,
                     color: '#4b5563', // text-gray-600
+                  }
+                },
+                tooltip: {
+                  callbacks: {
+                    label: (context) => {
+                      const value = context.raw as number;
+                      const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                      const percentage = ((value / total) * 100).toFixed(1);
+                      return `₹${value.toFixed(2)} (${percentage}%)`;
+                    }
                   },
                 },
               },
