@@ -22,7 +22,7 @@ export function SettingsView({ onClearData, clearDataLoading, onDeleteAccount, d
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">Clear All Expense Data</h4>
+              <h4 className="font-medium text-gray-900">Clear Data</h4>
               <p className="mt-1 text-sm text-gray-500">
                 This will permanently delete all your expense records. This action cannot be undone.
               </p>
@@ -31,7 +31,7 @@ export function SettingsView({ onClearData, clearDataLoading, onDeleteAccount, d
                 disabled={clearDataLoading}
                 className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {clearDataLoading ? 'Clearing...' : 'Clear All Data'}
+                {clearDataLoading ? 'Clearing...' : 'Clear Data'}
               </button>
             </div>
           </div>
