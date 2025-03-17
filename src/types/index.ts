@@ -36,8 +36,6 @@ export type DateRange =
   | 'last-week'
   | 'last-month'
   | 'last-quarter'
-  | 'last-year'
-  | 'custom';
 
 export interface DateRangeOption {
   label: string;

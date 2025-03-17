@@ -14,10 +14,6 @@ function useAppState() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
   const [dateRange, setDateRange] = useState<DateRange>('last-week');
-  const [customDateRange, setCustomDateRange] = useState<{ start: Date | null; end: Date | null }>({
-    start: new Date(new Date().setDate(new Date().getDate() - 7)),
-    end: new Date()
-  });
   const [clearDataLoading, setClearDataLoading] = useState(false);
   return { 
     editingExpense, 
@@ -26,8 +22,6 @@ function useAppState() {
     setActiveView, 
     dateRange,
     setDateRange,
-    customDateRange,
-    setCustomDateRange,
     clearDataLoading, 
     setClearDataLoading 
   };
@@ -42,8 +36,6 @@ function App() {
     setActiveView,
     dateRange,
     setDateRange,
-    customDateRange,
-    setCustomDateRange,
     clearDataLoading, 
     setClearDataLoading 
   } = useAppState();
@@ -81,9 +73,7 @@ function App() {
   const summary = calculateExpenseSummary(
     expenses, 
     categories, 
-    dateRange,
-    customDateRange.start,
-    customDateRange.end
+    dateRange
   );
 
   if (loading) {

@@ -17,8 +17,7 @@ export const DATE_RANGE_OPTIONS = [
   { label: 'Last Week', value: 'last-week' },
   { label: 'Last Month', value: 'last-month' },
   { label: 'Last Quarter', value: 'last-quarter' },
-  { label: 'Last Year', value: 'last-year' },
-  { label: 'Custom Range', value: 'custom' }
+  { label: 'Last Year', value: 'last-year' }
 ];
 
 interface DateRangeConfig {
@@ -28,89 +27,80 @@ interface DateRangeConfig {
   getIntervals: (start: Date, end: Date) => Date[];
 }
 
-function getDateRangeConfig(range: DateRange, customStart?: Date, customEnd?: Date): DateRangeConfig {
+function getDateRangeConfig(range: DateRange, customStart?: Date | null, customEnd?: Date | null): DateRangeConfig {
   const end = endOfDay(new Date());
-  let start: Date;
-  let formatInterval: (date: Date) => string;
-  let getIntervals: (start: Date, end: Date) => Date[];
-  let intervalEnd: (date: Date) => Date;
-
   const today = endOfDay(new Date());
+  let config: DateRangeConfig = {
+    start: startOfDay(subDays(today, 6)), // default to last week
+    end,
+    formatInterval: (date) => format(date, 'EEE'),
+    getIntervals: (start, end) => {
+      const days = eachDayOfInterval({ start, end });
+      return days.map(day => startOfDay(day));
+    }
+  };
 
   switch (range) {
     case 'last-week':
-      start = startOfDay(subDays(end, 6));
-      formatInterval = (date) => format(date, 'EEE');
-      getIntervals = eachDayOfInterval;
-      intervalEnd = endOfDay;
+      // Use defaults
       break;
     case 'last-month':
-      start = startOfDay(subDays(end, 29));
-      formatInterval = (date) => format(date, 'MMM d');
-      getIntervals = eachDayOfInterval;
-      intervalEnd = endOfDay;
+      config = {
+        start: startOfDay(subDays(today, 29)),
+        end,
+        formatInterval: (date) => format(date, 'MMM d'),
+        getIntervals: (start, end) => {
+          const days = eachDayOfInterval({ start, end });
+          return days.map(day => startOfDay(day));
+        }
+      };
       break;
     case 'last-quarter':
-      start = startOfDay(subQuarters(end, 1));
-      formatInterval = (date) => format(date, 'MMM');
-      getIntervals = (start, end) => eachMonthOfInterval({ start, end });
-      intervalEnd = (date) => {
-        const nextMonth = new Date(date);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        nextMonth.setDate(0);
-        return endOfDay(nextMonth);
+      config = {
+        start: startOfDay(subQuarters(today, 1)),
+        end,
+        formatInterval: (date) => format(date, 'MMM'),
+        getIntervals: (start, end) => eachMonthOfInterval({ start, end })
       };
       break;
     case 'last-year':
-      start = startOfDay(subYears(end, 1));
-      formatInterval = (date) => format(date, 'MMM');
-      getIntervals = (start, end) => eachMonthOfInterval({ start, end });
-      intervalEnd = (date) => {
-        const nextMonth = new Date(date);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        nextMonth.setDate(0);
-        return endOfDay(nextMonth);
+      config = {
+        start: startOfDay(subYears(today, 1)),
+        end,
+        formatInterval: (date) => format(date, 'MMM'),
+        getIntervals: (start, end) => eachMonthOfInterval({ start, end })
       };
       break;
     case 'custom':
-      // Default to last 7 days if no custom dates are provided
-      start = startOfDay(customStart || subDays(today, 6));
-      end = endOfDay(customEnd || today);
-      formatInterval = (date) => format(date, 'MMM d');
       const dayDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-      if (dayDiff <= 31) {
-        getIntervals = eachDayOfInterval;
-        intervalEnd = endOfDay;
-      } else if (dayDiff <= 90) {
-        getIntervals = (start, end) => eachWeekOfInterval({ start, end });
-        intervalEnd = (date) => {
-          const nextWeek = new Date(date);
-          nextWeek.setDate(nextWeek.getDate() + 6);
-          return endOfDay(nextWeek);
-        };
-      } else {
-        getIntervals = (start, end) => eachMonthOfInterval({ start, end });
-        intervalEnd = (date) => {
-          const nextMonth = new Date(date);
-          nextMonth.setMonth(nextMonth.getMonth() + 1);
-          nextMonth.setDate(0);
-          return endOfDay(nextMonth);
-        };
-      }
+      config = {
+        start: startOfDay(customStart || subDays(today, 6)),
+        end: endOfDay(customEnd || today),
+        formatInterval: (date) => format(date, 'MMM d'),
+        getIntervals: (start, end) => {
+          if (dayDiff <= 31) {
+            return eachDayOfInterval({ start, end });
+          } else if (dayDiff <= 90) {
+            return eachWeekOfInterval({ start, end });
+          } else {
+            return eachMonthOfInterval({ start, end });
+          }
+        }
+      };
       break;
   }
 
-  return { start, end, formatInterval, getIntervals, intervalEnd };
+  return config;
 }
 
 export function calculateExpenseSummary(
   expenses: Expense[], 
   categories: Category[],
   dateRange: DateRange,
-  customStart?: Date,
-  customEnd?: Date
+  customStart?: Date | null,
+  customEnd?: Date | null
 ): ExpenseSummary {
-  const { start, end, formatInterval, getIntervals, intervalEnd } = getDateRangeConfig(dateRange, customStart, customEnd);
+  const { start, end, formatInterval, getIntervals } = getDateRangeConfig(dateRange, customStart, customEnd);
   
   const filteredExpenses = expenses.filter(exp => {
     const expDate = new Date(exp.expense_date);
@@ -126,7 +116,7 @@ export function calculateExpenseSummary(
       }
       return acc;
     }, {} as Record<string, number>),
-    timeData: getTimeSeriesData(filteredExpenses, start, end, formatInterval, getIntervals, intervalEnd),
+    timeData: getTimeSeriesData(filteredExpenses, start, end, formatInterval, getIntervals),
     categoryData: getCategoryData(filteredExpenses, categories),
   };
 }
@@ -136,19 +126,21 @@ function getTimeSeriesData(
   start: Date,
   end: Date,
   formatInterval: (date: Date) => string,
-  getIntervals: (start: Date, end: Date) => Date[],
-  intervalEnd: (date: Date) => Date
+  getIntervals: (start: Date, end: Date) => Date[]
 ) {
   const intervals = getIntervals(start, end);
   
   const labels = intervals.map(interval => formatInterval(interval));
-  const data = intervals.map(intervalStart => {
-    const endDate = intervalEnd(intervalStart);
-
+  const data = intervals.map((interval, index) => {
+    const intervalStart = startOfDay(interval);
+    const intervalEnd = index === intervals.length - 1 
+      ? endOfDay(interval)
+      : startOfDay(intervals[index + 1]);
+    
     return expenses
       .filter(exp => {
         const expDate = new Date(exp.expense_date);
-        return expDate >= intervalStart && expDate <= endDate;
+        return isWithinInterval(expDate, { start: intervalStart, end: intervalEnd });
       })
       .reduce((sum, exp) => sum + exp.amount, 0);
   });

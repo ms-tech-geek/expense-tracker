@@ -29,17 +29,13 @@ interface ExpenseSummaryProps {
   categories: Category[];
   dateRange: DateRange;
   onDateRangeChange: (range: DateRange) => void;
-  customDateRange: { start: Date | null; end: Date | null };
-  onCustomDateRangeChange: (start: Date | null, end: Date | null) => void;
 }
 
 export function ExpenseSummary({ 
   summary, 
   categories, 
   dateRange, 
-  onDateRangeChange,
-  customDateRange,
-  onCustomDateRangeChange
+  onDateRangeChange
 }: ExpenseSummaryProps) {
   const [isDatePickerOpen, setIsDatePickerOpen] = React.useState(false);
 
@@ -93,40 +89,6 @@ export function ExpenseSummary({
             )}
           </div>
         </div>
-        {dateRange === 'custom' && (
-          <div className="flex space-x-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Start Date
-              </label>
-              <input
-                type="date"
-                value={customDateRange.start?.toISOString().split('T')[0] || ''}
-                onChange={(e) => {
-                  const date = e.target.value ? new Date(e.target.value) : null;
-                  onCustomDateRangeChange(date, customDateRange.end);
-                }}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                max={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                End Date
-              </label>
-              <input
-                type="date"
-                value={customDateRange.end?.toISOString().split('T')[0] || ''}
-                onChange={(e) => {
-                  const date = e.target.value ? new Date(e.target.value) : null;
-                  onCustomDateRangeChange(customDateRange.start, date);
-                }}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                max={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-          </div>
-        )}
         <div className="h-48">
           <Bar
             data={{
