@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Save, X } from 'lucide-react';
+import { Plus, Save, X, AlertCircle } from 'lucide-react';
 import { Expense, Category } from '../../types';
+
+interface ValidationErrors {
+  amount?: string;
+  category?: string;
+  expenseDate?: string;
+}
+
+const MAX_AMOUNT = 10000000; // 1 crore INR
 
 interface GroupedCategories {
   [key: string]: {
@@ -21,6 +29,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [expenseDate, setExpenseDate] = useState(
     new Date().toISOString().split('T')[0]
   );
@@ -52,9 +61,41 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
     }
   }, [initialExpense]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+    
+    // Amount validation
+    const amountValue = parseFloat(amount);
+    if (!amount.trim()) {
+      errors.amount = 'Amount is required';
+    } else if (isNaN(amountValue) || amountValue <= 0) {
+      errors.amount = 'Amount must be greater than 0';
+    } else if (amountValue > MAX_AMOUNT) {
+      errors.amount = 'Amount cannot exceed ₹1 crore';
+    }
+    
+    // Category validation
+    if (!category) {
+      errors.category = 'Please select a category';
+    }
+    
+    // Date validation
+    const selectedDate = new Date(expenseDate);
+    const today = new Date();
+    if (selectedDate > today) {
+      errors.expenseDate = 'Date cannot be in the future';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || !category) return;
+    
+    if (!validateForm()) {
+      return;
+    }
 
     const expenseData = {
       amount: parseFloat(amount),
@@ -63,16 +104,41 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
       expense_date: new Date(expenseDate).toISOString(),
     };
 
-    if (initialExpense) {
-      onSubmit({ ...expenseData, id: initialExpense.id });
-    } else {
-      onSubmit(expenseData);
+    try {
+      if (initialExpense) {
+        await onSubmit({ ...expenseData, id: initialExpense.id });
+      } else {
+        await onSubmit(expenseData);
+      }
+      
+      setAmount('');
+      setCategory('');
+      setDescription('');
+      setValidationErrors({});
+      onSuccess?.();
+    } catch (error) {
+      setValidationErrors({
+        amount: error instanceof Error ? error.message : 'Failed to save expense'
+      });
     }
+  };
 
-    setAmount('');
-    setCategory('');
-    setDescription('');
-    onSuccess?.();
+  const handleInputChange = (field: 'amount' | 'category' | 'description' | 'expenseDate', value: string) => {
+    switch (field) {
+      case 'amount':
+        setAmount(value);
+        break;
+      case 'category':
+        setCategory(value);
+        break;
+      case 'description':
+        setDescription(value);
+        break;
+      case 'expenseDate':
+        setExpenseDate(value);
+        break;
+    }
+    setValidationErrors({});
   };
 
   return (
@@ -107,10 +173,21 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
             step="0.01"
             required
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+            autoComplete="off"
+            onChange={(e) => handleInputChange('amount', e.target.value)}
+            className={`block w-full pl-7 pr-12 sm:text-sm rounded-md ${
+              validationErrors.amount
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+            }`}
             placeholder="0.00"
           />
+          {validationErrors.amount && (
+            <p className="mt-1 text-sm text-red-600 flex items-center">
+              <AlertCircle className="w-4 h-4 mr-1" />
+              {validationErrors.amount}
+            </p>
+          )}
         </div>
       </div>
 
@@ -126,9 +203,19 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
             required
             value={expenseDate}
             max={new Date().toISOString().split('T')[0]}
-            onChange={(e) => setExpenseDate(e.target.value)}
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+            onChange={(e) => handleInputChange('expenseDate', e.target.value)}
+            className={`shadow-sm block w-full sm:text-sm rounded-md ${
+              validationErrors.expenseDate
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+            }`}
           />
+          {validationErrors.expenseDate && (
+            <p className="mt-1 text-sm text-red-600 flex items-center">
+              <AlertCircle className="w-4 h-4 mr-1" />
+              {validationErrors.expenseDate}
+            </p>
+          )}
         </div>
       </div>
 
@@ -140,8 +227,12 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
           id="category"
           required
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="mt-2 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          onChange={(e) => handleInputChange('category', e.target.value)}
+          className={`mt-2 block w-full pl-3 pr-10 py-2 text-base sm:text-sm rounded-md ${
+            validationErrors.category
+              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+              : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+          }`}
         >
           <option value="">Select a category</option>
           {Object.values(groupedCategories).map(({ parent, children }) => (
@@ -158,6 +249,12 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
             </optgroup>
           ))}
         </select>
+        {validationErrors.category && (
+          <p className="mt-1 text-sm text-red-600 flex items-center">
+            <AlertCircle className="w-4 h-4 mr-1" />
+            {validationErrors.category}
+          </p>
+        )}
       </div>
 
       <div>
@@ -170,7 +267,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
             name="description"
             id="description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => handleInputChange('description', e.target.value)}
             className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
             placeholder="Lunch with colleagues"
           />
