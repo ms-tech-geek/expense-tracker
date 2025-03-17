@@ -3,9 +3,11 @@ import {
   subDays,
   subQuarters,
   subYears,
+  subMonths,
   eachDayOfInterval,
   eachWeekOfInterval,
   eachMonthOfInterval,
+  eachQuarterOfInterval,
   startOfDay,
   endOfDay,
   isWithinInterval,
@@ -13,8 +15,8 @@ import {
   endOfMonth,
   startOfQuarter,
   endOfQuarter,
-  startOfYear,
-  endOfYear
+  startOfWeek,
+  endOfWeek
 } from 'date-fns';
 import { Expense, Category, ExpenseSummary, DateRange } from '../types';
 
@@ -34,50 +36,47 @@ interface DateRangeConfig {
 
 function getDateRangeConfig(range: DateRange, customStart?: Date | null, customEnd?: Date | null): DateRangeConfig {
   const today = endOfDay(new Date());
-  let end = today;
-  let start = startOfDay(subDays(today, 6)); // default to last week
-
-  let config: DateRangeConfig = {
-    start,
-    end,
-    formatInterval: (date) => format(date, 'EEE'),
-    getIntervals: (start, end) => {
-      const days = eachDayOfInterval({ start, end });
-      return days.map(day => startOfDay(day));
-    }
-  };
+  let config: DateRangeConfig;
 
   switch (range) {
     case 'last-week':
-      // Use defaults
+      config = {
+        start: startOfDay(subDays(today, 6)),
+        end: today,
+        formatInterval: (date) => format(date, 'EEE, MMM d'),
+        getIntervals: (start, end) => eachDayOfInterval({ start, end })
+      };
       break;
     case 'last-month':
       config = {
-        start: startOfDay(subDays(today, 29)),
+        start: startOfDay(subDays(today, 27)), // 4 weeks
         end: today,
         formatInterval: (date) => format(date, 'MMM d'),
-        getIntervals: (start, end) => {
-          const days = eachDayOfInterval({ start, end });
-          return days.map(day => startOfDay(day));
-        }
+        getIntervals: (start, end) => eachWeekOfInterval({ start, end })
       };
       break;
     case 'last-quarter':
       config = {
-        start: startOfQuarter(subQuarters(today, 1)),
-        end: endOfQuarter(today),
-        formatInterval: (date) => format(date, 'MMM'),
+        start: startOfMonth(subMonths(today, 2)),
+        end: today,
+        formatInterval: (date) => {
+          return format(date, 'MMM yyyy');
+        },
         getIntervals: (start, end) => eachMonthOfInterval({ start, end })
       };
       break;
     case 'last-year':
       config = {
-        start: startOfYear(subYears(today, 1)),
-        end: endOfYear(today),
-        formatInterval: (date) => format(date, 'MMM'),
-        getIntervals: (start, end) => eachMonthOfInterval({ start, end })
+        start: startOfQuarter(subQuarters(today, 3)),
+        end: today,
+        formatInterval: (date) => {
+          return `Q${format(date, 'Q yyyy')}`;
+        },
+        getIntervals: (start, end) => eachQuarterOfInterval({ start, end })
       };
       break;
+    default:
+      throw new Error(`Invalid date range: ${range}`);
   }
 
   return config;
@@ -125,10 +124,16 @@ function getTimeSeriesData(
   const data = intervals.map(interval => {
     let intervalStart: Date;
     let intervalEnd: Date;
-
-    if (dateRange === 'last-quarter' || dateRange === 'last-year') {
+    
+    if (dateRange === 'last-month') {
+      intervalStart = startOfWeek(interval);
+      intervalEnd = endOfWeek(interval);
+    } else if (dateRange === 'last-quarter') {
       intervalStart = startOfMonth(interval);
       intervalEnd = endOfMonth(interval);
+    } else if (dateRange === 'last-year') {
+      intervalStart = startOfQuarter(interval);
+      intervalEnd = endOfQuarter(interval);
     } else {
       intervalStart = startOfDay(interval);
       intervalEnd = endOfDay(interval);

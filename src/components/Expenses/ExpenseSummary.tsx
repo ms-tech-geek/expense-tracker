@@ -120,6 +120,14 @@ export function ExpenseSummary({
                 },
               },
               scales: {
+                x: {
+                  ticks: {
+                    maxRotation: 0,
+                    minRotation: 0,
+                    autoSkip: true,
+                    maxTicksLimit: 12
+                  }
+                },
                 y: {
                   beginAtZero: true,
                   ticks: {
