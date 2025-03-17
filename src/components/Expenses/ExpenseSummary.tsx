@@ -114,7 +114,7 @@ export function ExpenseSummary({
                   callbacks: {
                     label: (context) => {
                       const value = context.raw as number;
-                      return `₹${value.toFixed(2)}`;
+                      return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                     }
                   }
                 },
@@ -123,7 +123,7 @@ export function ExpenseSummary({
                 y: {
                   beginAtZero: true,
                   ticks: {
-                    callback: (value) => `₹${Number(value).toFixed(2)}`,
+                    callback: (value) => `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                   },
                 },
               },
@@ -172,7 +172,7 @@ export function ExpenseSummary({
                       const value = context.raw as number;
                       const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
                       const percentage = ((value / total) * 100).toFixed(1);
-                      return `₹${value.toFixed(2)} (${percentage}%)`;
+                      return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${percentage}%)`;
                     }
                   },
                 },
@@ -195,7 +195,7 @@ export function ExpenseSummary({
             return (
               <div key={categoryId} className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{category.name}</span>
-                <span className="font-medium">₹{amount.toFixed(2)}</span>
+                <span className="font-medium">₹{amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             );
           })}

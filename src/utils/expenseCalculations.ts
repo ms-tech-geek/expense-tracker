@@ -1,7 +1,6 @@
 import { 
   format, 
   subDays,
-  subMonths,
   subQuarters,
   subYears,
   eachDayOfInterval,
@@ -9,7 +8,13 @@ import {
   eachMonthOfInterval,
   startOfDay,
   endOfDay,
-  isWithinInterval
+  isWithinInterval,
+  startOfMonth,
+  endOfMonth,
+  startOfQuarter,
+  endOfQuarter,
+  startOfYear,
+  endOfYear
 } from 'date-fns';
 import { Expense, Category, ExpenseSummary, DateRange } from '../types';
 
@@ -28,10 +33,12 @@ interface DateRangeConfig {
 }
 
 function getDateRangeConfig(range: DateRange, customStart?: Date | null, customEnd?: Date | null): DateRangeConfig {
-  const end = endOfDay(new Date());
   const today = endOfDay(new Date());
+  let end = today;
+  let start = startOfDay(subDays(today, 6)); // default to last week
+
   let config: DateRangeConfig = {
-    start: startOfDay(subDays(today, 6)), // default to last week
+    start,
     end,
     formatInterval: (date) => format(date, 'EEE'),
     getIntervals: (start, end) => {
@@ -47,7 +54,7 @@ function getDateRangeConfig(range: DateRange, customStart?: Date | null, customE
     case 'last-month':
       config = {
         start: startOfDay(subDays(today, 29)),
-        end,
+        end: today,
         formatInterval: (date) => format(date, 'MMM d'),
         getIntervals: (start, end) => {
           const days = eachDayOfInterval({ start, end });
@@ -57,35 +64,18 @@ function getDateRangeConfig(range: DateRange, customStart?: Date | null, customE
       break;
     case 'last-quarter':
       config = {
-        start: startOfDay(subQuarters(today, 1)),
-        end,
+        start: startOfQuarter(subQuarters(today, 1)),
+        end: endOfQuarter(today),
         formatInterval: (date) => format(date, 'MMM'),
         getIntervals: (start, end) => eachMonthOfInterval({ start, end })
       };
       break;
     case 'last-year':
       config = {
-        start: startOfDay(subYears(today, 1)),
-        end,
+        start: startOfYear(subYears(today, 1)),
+        end: endOfYear(today),
         formatInterval: (date) => format(date, 'MMM'),
         getIntervals: (start, end) => eachMonthOfInterval({ start, end })
-      };
-      break;
-    case 'custom':
-      const dayDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-      config = {
-        start: startOfDay(customStart || subDays(today, 6)),
-        end: endOfDay(customEnd || today),
-        formatInterval: (date) => format(date, 'MMM d'),
-        getIntervals: (start, end) => {
-          if (dayDiff <= 31) {
-            return eachDayOfInterval({ start, end });
-          } else if (dayDiff <= 90) {
-            return eachWeekOfInterval({ start, end });
-          } else {
-            return eachMonthOfInterval({ start, end });
-          }
-        }
       };
       break;
   }
@@ -116,7 +106,7 @@ export function calculateExpenseSummary(
       }
       return acc;
     }, {} as Record<string, number>),
-    timeData: getTimeSeriesData(filteredExpenses, start, end, formatInterval, getIntervals),
+    timeData: getTimeSeriesData(filteredExpenses, start, end, formatInterval, getIntervals, dateRange),
     categoryData: getCategoryData(filteredExpenses, categories),
   };
 }
@@ -126,16 +116,23 @@ function getTimeSeriesData(
   start: Date,
   end: Date,
   formatInterval: (date: Date) => string,
-  getIntervals: (start: Date, end: Date) => Date[]
+  getIntervals: (start: Date, end: Date) => Date[],
+  dateRange: DateRange
 ) {
   const intervals = getIntervals(start, end);
   
   const labels = intervals.map(interval => formatInterval(interval));
-  const data = intervals.map((interval, index) => {
-    const intervalStart = startOfDay(interval);
-    const intervalEnd = index === intervals.length - 1 
-      ? endOfDay(interval)
-      : startOfDay(intervals[index + 1]);
+  const data = intervals.map(interval => {
+    let intervalStart: Date;
+    let intervalEnd: Date;
+
+    if (dateRange === 'last-quarter' || dateRange === 'last-year') {
+      intervalStart = startOfMonth(interval);
+      intervalEnd = endOfMonth(interval);
+    } else {
+      intervalStart = startOfDay(interval);
+      intervalEnd = endOfDay(interval);
+    }
     
     return expenses
       .filter(exp => {
