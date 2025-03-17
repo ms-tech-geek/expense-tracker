@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 interface DeleteAccountOptions {
   onSuccess?: () => void;
@@ -11,15 +12,38 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
+  const [refreshError, setRefreshError] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const handleAuthChange = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          if (error.message.includes('refresh_token')) {
+            setRefreshError(true);
+            await handleSignOut();
+          }
+          throw error;
+        }
+        setUser(session?.user ?? null);
+      } catch (err) {
+        console.error('Auth error:', err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    handleAuthChange();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'TOKEN_REFRESHED') {
+        setRefreshError(false);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      } else {
+        setUser(session?.user ?? null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -32,12 +56,11 @@ export function useAuth() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (session) {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-      } else {
-        setUser(null);
-      }
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      setUser(null);
+      setRefreshError(false);
     } catch (error) {
       console.error('Error signing out:', error);
       setUser(null);
@@ -81,6 +104,7 @@ export function useAuth() {
     user,
     loading,
     signOutLoading,
+    refreshError,
     deleteAccountLoading,
     handleSignOut,
     handleDeleteAccount

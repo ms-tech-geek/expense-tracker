@@ -9,6 +9,7 @@ import { ExpenseForm, ExpenseList, ExpenseSummary } from './components/Expenses'
 import { AuthForm } from './components/Auth';
 import { calculateExpenseSummary } from './utils/expenseCalculations';
 import { supabase } from './lib/supabase';
+import { AlertCircle } from 'lucide-react';
 
 function useAppState() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -28,7 +29,7 @@ function useAppState() {
 }
 
 function App() {
-  const { user, loading, signOutLoading, deleteAccountLoading, handleSignOut, handleDeleteAccount } = useAuth();
+  const { user, loading, signOutLoading, refreshError, deleteAccountLoading, handleSignOut, handleDeleteAccount } = useAuth();
   const { 
     editingExpense, 
     setEditingExpense, 
@@ -80,6 +81,26 @@ function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-100 to-white">
         <div className="animate-pulse text-indigo-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (refreshError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-100 to-white px-4">
+        <div className="bg-white p-8 rounded-xl shadow-sm max-w-md w-full space-y-4 text-center">
+          <div className="flex justify-center">
+            <AlertCircle className="w-12 h-12 text-red-500" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900">Session Expired</h2>
+          <p className="text-gray-600">Your session has expired. Please sign in again to continue.</p>
+          <button
+            onClick={handleSignOut}
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Sign In Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -137,8 +158,6 @@ function App() {
                 categories={categories}
                 dateRange={dateRange}
                 onDateRangeChange={setDateRange}
-                customDateRange={customDateRange}
-                onCustomDateRangeChange={(start, end) => setCustomDateRange({ start, end })}
               />
             </div>
           )}
