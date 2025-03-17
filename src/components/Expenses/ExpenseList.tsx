@@ -143,31 +143,31 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
           className="bg-white px-4 py-3 group hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center">
-            <div className="p-1.5 bg-gray-100/50 rounded-lg shadow-sm shrink-0">
+            <div className="p-2 bg-gray-100/50 rounded-lg shadow-sm shrink-0">
               {getCategoryIcon(expense.category)}
             </div>
             <div className="min-w-0 flex-1 ml-3">
               <div className="flex items-center justify-between">
-                <p className="font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {categories.find((c) => c.id === expense.category)?.name}
                 </p>
-                <p className="text-base font-semibold text-gray-900 ml-3 shrink-0">
+                <p className="text-sm font-semibold text-gray-900 ml-3 shrink-0">
                   ₹{expense.amount.toFixed(2)}
                 </p>
               </div>
               <div className="flex items-center justify-between mt-0.5">
                 <div className="flex items-center space-x-2 min-w-0">
-                  <p className="text-sm text-gray-500 truncate">
+                  <p className="text-xs text-gray-500 truncate">
                     {formatDate(expense.expense_date)}
                     {expense.description && ` • ${expense.description}`}
                   </p>
                 </div>
-                <div className="flex items-center space-x-2 ml-2 shrink-0">
+                <div className="flex items-center space-x-1 ml-2 shrink-0">
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setActiveTooltip(activeTooltip === expense.id ? null : expense.id)}
-                      className={`p-1 rounded-md transition-colors ${
+                      className={`p-1.5 rounded-full transition-colors ${
                         activeTooltip === expense.id ? 'text-indigo-600' : 'text-gray-400 hover:text-indigo-600'
                       }`}
                     >
@@ -185,7 +185,7 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
                   </div>
                   <button
                     onClick={() => onEdit(expense)}
-                    className="p-1 text-gray-400 hover:text-indigo-600 rounded-md transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-indigo-600 rounded-full transition-colors"
                     title="Edit expense"
                   >
                     <Pencil className="w-4 h-4" />
@@ -196,7 +196,7 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
                         onDelete(expense.id);
                       }
                     }}
-                    className="p-1 text-gray-400 hover:text-red-600 rounded-md transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-red-600 rounded-full transition-colors"
                     title="Delete expense"
                   >
                     <Trash2 className="w-4 h-4" />
