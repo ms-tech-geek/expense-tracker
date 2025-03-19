@@ -9,6 +9,7 @@
   "type": "module",
   "scripts": {
     "web": "cd apps/web && npm run dev",
+    "start": "cd apps/mobile && npm run start",
     "mobile": "cd apps/mobile && npm run dev",
     "build:web": "cd apps/web && npm run build",
     "build:mobile": "cd apps/mobile && npm run build",
