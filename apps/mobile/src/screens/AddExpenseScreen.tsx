@@ -8,15 +8,21 @@ import type { RootStackParamList } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddExpense'>;
 
-export function AddExpenseScreen({ navigation }: Props) {
+export function AddExpenseScreen({ navigation, route }: Props) {
   const { user } = useAuth();
-  const { addExpense } = useExpenses(user?.id);
+  const { addExpense, updateExpense } = useExpenses(user?.id);
+  const initialExpense = route.params?.initialExpense;
 
   return (
     <View style={styles.container}>
       <ExpenseForm
+        initialExpense={initialExpense}
         onSubmit={async (expense) => {
-          await addExpense(expense);
+          if (initialExpense) {
+            await updateExpense({ ...expense, id: initialExpense.id });
+          } else {
+            await addExpense(expense);
+          }
           navigation.goBack();
         }}
       />

@@ -6,9 +6,10 @@ import { format } from 'date-fns';
 
 interface ExpenseListProps {
   expenses: Expense[];
+  onEdit: (expense: Expense) => void;
 }
 
-export function ExpenseList({ expenses }: ExpenseListProps) {
+export function ExpenseList({ expenses, onEdit }: ExpenseListProps) {
   const { categories } = useCategories();
 
   const formatDate = (dateString: string) => {
@@ -22,9 +23,7 @@ export function ExpenseList({ expenses }: ExpenseListProps) {
   const renderItem = ({ item }: { item: Expense }) => (
     <TouchableOpacity
       style={styles.expenseItem}
-      onPress={() => {
-        // TODO: Implement edit functionality
-      }}
+      onPress={() => onEdit(item)}
     >
       <View style={styles.expenseHeader}>
         <Text style={styles.categoryText}>{getCategoryName(item.category)}</Text>

@@ -1,7 +1,9 @@
+import { Expense } from '@expense-tracker/shared';
+
 export type RootStackParamList = {
-    Auth: undefined;
-    Home: undefined;
-    AddExpense: { initialExpense?: Expense };
-    Analytics: undefined;
-    Settings: undefined;
-  }
+  Auth: undefined;
+  Home: undefined;
+  AddExpense: { initialExpense?: Expense };
+  Analytics: undefined;
+  Settings: undefined;
+}
