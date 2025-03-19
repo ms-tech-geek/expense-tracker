@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "EXPO_NO_DAEMON=1 expo start --clear",
+    "dev": "expo start",
     "android": "EXPO_NO_DAEMON=1 expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
