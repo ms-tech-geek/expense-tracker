@@ -1,7 +1,7 @@
 import React from 'react';
 import { Expense, Category } from '../../types';
 import * as Icons from 'lucide-react';
-import { Pencil, Trash2, Info, ChevronUp, ChevronDown, AlertCircle, X } from 'lucide-react';
+import { Pencil, Trash2, Info, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
 import { ExpenseSearch } from './ExpenseSearch';
 
 interface ExpenseListProps {

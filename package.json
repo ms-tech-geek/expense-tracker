@@ -8,11 +8,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "web": "npm run dev -w apps/web",
-    "mobile": "npm run start -w apps/mobile",
-    "build:web": "npm run build -w apps/web",
-    "build:mobile": "npm run build -w apps/mobile",
+    "web": "cd apps/web && npm run dev",
+    "mobile": "cd apps/mobile && npm run dev",
+    "build:web": "cd apps/web && npm run build",
+    "build:mobile": "cd apps/mobile && npm run build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "cd apps/web && npm run preview"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "eslint": "^9.9.1",
+    "globals": "^15.9.0",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.3.0"
   }
 }
