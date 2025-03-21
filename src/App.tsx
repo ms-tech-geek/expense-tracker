@@ -7,7 +7,7 @@ import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { Header, Navigation } from './components/Layout';
 import { SettingsView } from './components/Settings';
 import { ExpenseForm, ExpenseList, ExpenseSummary } from './components/Expenses';
-import { AuthForm } from './components/Auth';
+import { AuthForm, DeleteAccount } from './components/Auth';
 import { PrivacyPolicy } from './components/Privacy';
 import { calculateExpenseSummary } from './utils/expenseCalculations';
 import { supabase } from './lib/supabase';
@@ -181,6 +181,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
         <Route
           path="/*"
           element={

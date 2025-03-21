@@ -4,18 +4,17 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    exclude: ['lucide-react']
   },
   build: {
     outDir: 'dist',
     rollupOptions: {
       input: {
-        main: 'index.html',
-        sw: 'public/sw.js'
+        main: 'index.html'
       },
       output: {
-        manualChunks: undefined
-      },
+        assetFileNames: 'assets/[name].[hash].[ext]'
+      }
     }
   }
 });

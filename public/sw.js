@@ -32,9 +32,14 @@ self.addEventListener('activate', (event) => {
 // Fetch handler with different strategies based on request type
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  
-  // Skip non-GET requests and chrome-extension requests
-  if (request.method !== 'GET' || request.url.startsWith('chrome-extension://')) {
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // Skip chrome-extension and other non-http(s) requests
+  if (!request.url.startsWith('http')) {
     return;
   }
 
@@ -59,18 +64,21 @@ self.addEventListener('fetch', (event) => {
       if (response) {
         return response;
       }
+
       return fetch(request).then((networkResponse) => {
         if (!networkResponse || networkResponse.status !== 200) {
           return networkResponse;
         }
 
-        return caches.open(CACHE_NAME).then((cache) => {
-          // Only cache same-origin requests
-          if (new URL(request.url).origin === location.origin) {
+        // Only cache same-origin requests
+        if (new URL(request.url).origin === location.origin) {
+          return caches.open(CACHE_NAME).then((cache) => {
             cache.put(request, networkResponse.clone());
-          }
-          return networkResponse;
-        });
+            return networkResponse;
+          });
+        }
+
+        return networkResponse;
       });
     })
   );
