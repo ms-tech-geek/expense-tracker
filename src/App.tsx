@@ -17,16 +17,13 @@ function useAppState() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
   const [dateRange, setDateRange] = useState<DateRange>('last-week');
-  const [clearDataLoading, setClearDataLoading] = useState(false);
   return { 
     editingExpense, 
     setEditingExpense, 
     activeView, 
     setActiveView, 
     dateRange,
-    setDateRange,
-    clearDataLoading, 
-    setClearDataLoading 
+    setDateRange
   };
 }
 
@@ -38,9 +35,7 @@ function App() {
     activeView, 
     setActiveView,
     dateRange,
-    setDateRange,
-    clearDataLoading, 
-    setClearDataLoading 
+    setDateRange
   } = useAppState();
   const { expenses, addExpense, updateExpense, deleteExpense, setExpenses } = useExpenses(user?.id);
   const { categories } = useCategories();
@@ -100,8 +95,6 @@ function App() {
 
           {activeView === 'settings' && (
             <SettingsView
-              onClearData={handleClearData}
-              clearDataLoading={clearDataLoading}
               onDeleteAccount={() => handleDeleteAccount({
                 onError: (error) => alert(error.message)
               })}
@@ -114,34 +107,6 @@ function App() {
       <Navigation activeView={activeView} onViewChange={setActiveView} />
     </div>
   );
-
-  const handleClearData = async () => {
-    if (!user) return;
-    
-    if (!window.confirm('Are you sure you want to clear all expense data? This action cannot be undone.')) {
-      return;
-    }
-    
-    setClearDataLoading(true);
-    try {
-      const { error } = await supabase
-        .from('expenses')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      setExpenses([]);
-      alert('All expense data has been cleared successfully.');
-    } catch (error) {
-      console.error('Error clearing data:', error);
-      alert('Failed to clear data. Please try again.');
-    } finally {
-      setClearDataLoading(false);
-    }
-  };
 
   const summary = calculateExpenseSummary(
     expenses, 
