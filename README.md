@@ -4,8 +4,6 @@ A comprehensive expense tracking application built with React, TypeScript, and S
 
 ## Table of Contents
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -14,51 +12,6 @@ A comprehensive expense tracking application built with React, TypeScript, and S
 - [Usage](#usage)
 - [Account Management](#account-management)
 - [Data Privacy](#data-privacy)
-
-## Features
-
-- **User Authentication**
-  - Email and password-based signup/login
-  - Secure session management
-  - Account deletion options
-
-- **Expense Management**
-  - Add, edit, and delete expenses
-  - Categorize expenses with hierarchical categories
-  - Add descriptions and dates
-  - Search and filter expenses
-
-- **Categories**
-  - Pre-defined category hierarchy
-  - Color-coded categories with icons
-  - Parent-child relationship support
-
-- **Analytics & Insights**
-  - Visual expense breakdowns
-  - Time-based analysis (weekly, monthly, quarterly, yearly)
-  - Category-wise distribution
-  - Interactive charts and graphs
-
-- **Data Privacy & Security**
-  - Row Level Security (RLS)
-  - Data deletion requests
-  - Privacy policy compliance
-  - Secure data handling
-
-- **Progressive Web App (PWA)**
-  - Offline support
-  - Install on device
-  - Push notifications ready
-
-## Tech Stack
-
-- React 18
-- TypeScript
-- Tailwind CSS
-- Supabase (Authentication & Database)
-- Chart.js
-- Vite
-- PWA Support
 
 ## Getting Started
 
@@ -72,7 +25,7 @@ A comprehensive expense tracking application built with React, TypeScript, and S
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/expense-tracker.git
+   git clone https://github.com/ms-tech-geek/expense-tracker.git
    cd expense-tracker
    ```
 
