@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LogIn, UserPlus, Wallet, AlertCircle, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 
 interface ValidationErrors {
@@ -233,6 +234,17 @@ export function AuthForm() {
           >
             {isLogin ? 'Create an account' : 'Sign in to your account'}
           </button>
+
+          <div className="text-center text-sm text-gray-500 flex items-center justify-center gap-1">
+            <span>By using Expense Tracker, you agree to our</span>
+            <Link 
+              to="/privacy" 
+              className="text-indigo-600 hover:text-indigo-700"
+            >
+              Privacy Policy
+            </Link>
+          </div>
+          
         </div>
       </div>
     </div>

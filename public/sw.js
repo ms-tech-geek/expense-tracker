@@ -1,13 +1,11 @@
 const CACHE_NAME = 'expense-tracker-v1';
 const STATIC_ASSETS = [
   '/index.html',
-  '/',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'
 ];
 
-// Cache static assets during installation
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -31,39 +29,38 @@ self.addEventListener('activate', (event) => {
 
 // Fetch handler with different strategies based on request type
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
+  const request = event.request;
   
-  // Handle API requests (network-first strategy)
-  if (request.url.includes('/rest/v1/') || request.url.includes('/auth/v1/')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (!response || response.status !== 200) {
-            return caches.match(request);
-          }
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
     return;
   }
 
-  // Handle static assets (cache-first strategy)
+  // Skip non-HTTP(S) requests
+  if (!request.url.startsWith('http')) {
+    return;
+  }
+
+  // Handle all requests with a network-first strategy
   event.respondWith(
-    caches.match(request).then((response) => {
-      if (response) {
-        return response;
-      }
-      return fetch(request).then((networkResponse) => {
+    fetch(request)
+      .then((networkResponse) => {
         if (!networkResponse || networkResponse.status !== 200) {
-          return networkResponse;
+          return caches.match(request);
         }
         
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, networkResponse.clone());
-          return networkResponse;
-        });
-      });
-    })
+        // Only cache same-origin responses
+        if (new URL(request.url).origin === location.origin) {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, networkResponse.clone());
+            return networkResponse;
+          });
+        }
+        
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(request);
+      })
   );
 });
