@@ -1,5 +1,7 @@
 import React from 'react';
 import { AlertTriangle, UserX } from 'lucide-react';
+import { DataDeletionForm } from './DataDeletionForm';
+import { useCategories } from '../../hooks/useCategories';
 
 interface SettingsViewProps {
   onClearData: () => void;
@@ -9,6 +11,8 @@ interface SettingsViewProps {
 }
 
 export function SettingsView({ onClearData, clearDataLoading, onDeleteAccount, deleteAccountLoading }: SettingsViewProps) {
+  const { categories } = useCategories();
+
   return (
     <div className="p-4 space-y-6">
       <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
@@ -17,6 +21,8 @@ export function SettingsView({ onClearData, clearDataLoading, onDeleteAccount, d
         <h3 className="font-medium text-gray-900">Data Management</h3>
         
         <div className="border-t pt-4 space-y-6">
+          <DataDeletionForm categories={categories} />
+
           <div className="flex items-start space-x-4 text-left">
             <div className="p-2 bg-red-50 rounded-full">
               <AlertTriangle className="w-5 h-5 text-red-600" />
