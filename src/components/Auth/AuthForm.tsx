@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LogIn, UserPlus, Wallet, AlertCircle, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 
 interface ValidationErrors {
@@ -117,6 +118,12 @@ export function AuthForm() {
           <p className="mt-2 text-sm text-gray-600">
             by Ms Tech Geek
           </p>
+          <Link 
+            to="/privacy" 
+            className="mt-2 text-sm text-indigo-600 hover:text-indigo-700 inline-block"
+          >
+            Privacy Policy
+          </Link>
         </div>
 
         <div className="bg-white px-6 py-8 rounded-xl shadow-sm space-y-6">
