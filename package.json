@@ -8,7 +8,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "web": "cd apps/web && npm run dev",
+    "web": "cd apps/web && npm run dev", 
     "mobile": "cd apps/mobile && npm run dev",
     "build:web": "cd apps/web && npm run build",
     "build:mobile": "cd apps/mobile && npm run build",
