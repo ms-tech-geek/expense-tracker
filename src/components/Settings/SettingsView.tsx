@@ -20,6 +20,23 @@ export function SettingsView({ onDeleteAccount, deleteAccountLoading }: Settings
         
         <div className="border-t pt-4 space-y-6">
           <DataDeletionForm categories={categories} />
+          <p className="mt-2 text-gray-600">
+            You can request data deletion in any of these ways:
+          </p>
+          <div className="mt-2 space-y-2 text-sm text-gray-500">
+            <p className="flex items-start">
+              <span className="font-medium mr-2">1.</span>
+              Use the form above to request deletion of specific data
+            </p>
+            <p className="flex items-start">
+              <span className="font-medium mr-2">2.</span>
+              Visit <a href="https://expense-tracker-ms-tech-geek.netlify.app/delete-data" className="text-indigo-600 hover:text-indigo-700">our data deletion page</a>
+            </p>
+            <p className="flex items-start">
+              <span className="font-medium mr-2">3.</span>
+              Email <a href="mailto:mayanksethi.apps@gmail.com?subject=Data%20Deletion%20Request" className="text-indigo-600 hover:text-indigo-700">mayanksethi.apps@gmail.com</a>
+            </p>
+          </div>
 
           <div className="flex items-start space-x-4 text-left pt-4 border-t">
             <div className="p-2 bg-red-50 rounded-full">
