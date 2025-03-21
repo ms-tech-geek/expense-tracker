@@ -7,11 +7,15 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
+    outDir: 'dist',
     rollupOptions: {
       input: {
         main: 'index.html',
         sw: 'public/sw.js'
-      }
+      },
+      output: {
+        manualChunks: undefined
+      },
     }
   }
 });

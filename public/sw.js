@@ -33,6 +33,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   
+  // Skip non-GET requests and chrome-extension requests
+  if (request.method !== 'GET' || request.url.startsWith('chrome-extension://')) {
+    return;
+  }
+
   // Handle API requests (network-first strategy)
   if (request.url.includes('/rest/v1/') || request.url.includes('/auth/v1/')) {
     event.respondWith(
@@ -58,9 +63,12 @@ self.addEventListener('fetch', (event) => {
         if (!networkResponse || networkResponse.status !== 200) {
           return networkResponse;
         }
-        
+
         return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, networkResponse.clone());
+          // Only cache same-origin requests
+          if (new URL(request.url).origin === location.origin) {
+            cache.put(request, networkResponse.clone());
+          }
           return networkResponse;
         });
       });
