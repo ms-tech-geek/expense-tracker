@@ -13,7 +13,8 @@ export default defineConfig({
         main: 'index.html'
       },
       output: {
-        assetFileNames: 'assets/[name].[hash].[ext]'
+        assetFileNames: 'assets/[name].[ext]',
+        chunkFileNames: 'assets/[name].js'
       }
     }
   }
