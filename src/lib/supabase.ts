@@ -12,6 +12,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: true,
     storageKey: 'expense-tracker-auth',
     storage: localStorage,
-    autoRefreshToken: true
+    autoRefreshToken: true,
+    detectSessionInUrl: true
   }
 });

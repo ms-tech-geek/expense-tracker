@@ -77,6 +77,7 @@ export function AuthForm() {
         if (error) throw error;
         setResetSuccess(true);
         setEmail('');
+        setError('Password reset instructions have been sent to your email');
         return;
       } else if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -87,12 +88,18 @@ export function AuthForm() {
           if (error.message === 'Invalid login credentials') {
             throw new Error('Invalid email or password');
           }
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('Please check your email to confirm your account before signing in');
+          }
           throw error;
         }
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`
+          }
         });
         if (error) {
           if (error.message.includes('password')) {
@@ -100,8 +107,8 @@ export function AuthForm() {
           }
           throw error;
         }
-        if (data.user && !data.session) {
-          setError('Please check your email to confirm your account');
+        if (data.user) {
+          setError('Please check your email to confirm your account. You will not be able to sign in until you confirm your email.');
           setEmail('');
           setPassword('');
           return;
