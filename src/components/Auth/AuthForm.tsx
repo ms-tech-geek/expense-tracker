@@ -72,11 +72,12 @@ export function AuthForm() {
     try {
       if (isForgotPassword) {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: `${window.location.origin}/update-password`,
         });
         if (error) throw error;
         setResetSuccess(true);
         setEmail('');
+        return;
       } else if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -142,7 +143,7 @@ export function AuthForm() {
 
         <div className="bg-white px-6 py-8 rounded-xl shadow-sm space-y-6">
           <h2 className="text-2xl font-semibold text-center text-gray-900">
-            {isLogin ? 'Welcome Back!' : 'Create Account'}
+            {isForgotPassword ? 'Reset Password' : (isLogin ? 'Welcome Back!' : 'Create Account')}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
