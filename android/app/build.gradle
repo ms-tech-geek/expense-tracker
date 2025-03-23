@@ -1,9 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    buildToolsVersion '36.0.0'
     namespace "com.mstechgeek.expensetracker"
-    compileSdkVersion compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.mstechgeek.expensetracker"
         minSdkVersion rootProject.ext.minSdkVersion
