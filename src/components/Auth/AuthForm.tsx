@@ -197,6 +197,17 @@ export function AuthForm() {
                   {validationErrors.password}
                 </p>
               )}
+              {isLogin && (
+                <div className="mt-1 text-right">
+                  <button
+                    type="button"
+                    onClick={() => handleModeChange('forgot')}
+                    className="text-sm text-indigo-600 hover:text-indigo-700"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
               {!isLogin && (
                 <p className="mt-1 text-xs text-gray-500 flex items-center">
                   <AlertCircle className="w-3 h-3 mr-1" />
@@ -269,16 +280,6 @@ export function AuthForm() {
             >
               {isForgotPassword ? 'Back to Sign In' : (isLogin ? 'Create an account' : 'Sign in to your account')}
             </button>
-            
-            {isLogin && !isForgotPassword && (
-              <button
-                type="button"
-                onClick={() => handleModeChange('forgot')}
-                className="w-full text-center text-sm text-gray-500 hover:text-gray-700"
-              >
-                Forgot your password?
-              </button>
-            )}
           </div>
 
           <div className="text-center text-sm text-gray-500 flex items-center justify-center gap-1">
