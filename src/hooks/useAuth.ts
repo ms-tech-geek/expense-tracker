@@ -16,19 +16,28 @@ export function useAuth() {
   useEffect(() => {
     // Initialize auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.email_confirmed_at) {
       setUser(session?.user ?? null);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       try {
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
           setUser(session?.user);
           setRefreshError(false);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setRefreshError(false);
+        } else if (event === 'USER_UPDATED') {
+          if (session?.user?.email_confirmed_at) {
+            setUser(session.user);
+            setRefreshError(false);
+          }
         } else if (event === 'TOKEN_REFRESHED') {
           setRefreshError(false);
         } else if (event === 'USER_DELETED') {

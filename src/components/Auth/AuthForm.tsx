@@ -72,12 +72,12 @@ export function AuthForm() {
     try {
       if (isForgotPassword) {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/update-password`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
         });
         if (error) throw error;
         setResetSuccess(true);
         setEmail('');
-        setError('Password reset instructions have been sent to your email');
+        setError('Check your email for password reset instructions');
         return;
       } else if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -98,7 +98,10 @@ export function AuthForm() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+            data: {
+              redirect_to: '/dashboard'
+            }
           }
         });
         if (error) {
@@ -108,7 +111,7 @@ export function AuthForm() {
           throw error;
         }
         if (data.user) {
-          setError('Please check your email to confirm your account. You will not be able to sign in until you confirm your email.');
+          setError('Success! Please check your email to confirm your account before signing in.');
           setEmail('');
           setPassword('');
           return;
