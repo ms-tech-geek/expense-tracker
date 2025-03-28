@@ -20,7 +20,7 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
     direction: 'asc' | 'desc';
   }>({
     key: 'expense_date',
-    direction: 'desc'
+    direction: 'desc',
   });
 
   const filteredExpenses = React.useMemo(() => {
@@ -58,7 +58,7 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
   const handleSort = (key: 'expense_date' | 'amount') => {
     setSortConfig(current => ({
       key,
-      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc',
     }));
   };
 
@@ -73,7 +73,7 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
   const getTimestamp = (expense: Expense) => {
     const wasUpdated = expense.updated_at !== expense.created_at;
     const date = new Date(wasUpdated ? expense.updated_at : expense.created_at);
-    
+
     return {
       text: date.toLocaleString('en-US', {
         month: '2-digit',
@@ -82,12 +82,12 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
         hour: 'numeric',
         minute: 'numeric',
       }),
-      isUpdated: wasUpdated
+      isUpdated: wasUpdated,
     };
   };
 
   const getCategoryIcon = (categoryId: string) => {
-    const category = categories.find((c) => c.id === categoryId);
+    const category = categories.find(c => c.id === categoryId);
     const IconComponent = Icons[category?.icon as keyof typeof Icons];
     return IconComponent ? <IconComponent className={`w-5 h-5 ${category?.color}`} /> : null;
   };
@@ -137,83 +137,88 @@ export function ExpenseList({ expenses, onEdit, onDelete, categories }: ExpenseL
         </div>
       </div>
       {sortedExpenses.length > 0 ? (
-        sortedExpenses.map((expense) => (
-        <div
-          key={expense.id}
-          className="bg-white px-4 py-3 group hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex items-center">
-            <div className="p-2 bg-gray-100/50 rounded-lg shadow-sm shrink-0">
-              {getCategoryIcon(expense.category)}
-            </div>
-            <div className="min-w-0 flex-1 ml-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {categories.find((c) => c.id === expense.category)?.name}
-                </p>
-                <p className="text-sm font-semibold text-gray-900 ml-3 shrink-0">
-                  ₹{expense.amount.toFixed(2)}
-                </p>
+        sortedExpenses.map(expense => (
+          <div
+            key={expense.id}
+            className="bg-white px-4 py-3 group hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center">
+              <div className="p-2 bg-gray-100/50 rounded-lg shadow-sm shrink-0">
+                {getCategoryIcon(expense.category)}
               </div>
-              <div className="flex items-center justify-between mt-0.5">
-                <div className="flex items-center space-x-2 min-w-0">
-                  <p className="text-xs text-gray-500 truncate">
-                    {formatDate(expense.expense_date)}
-                    {expense.description && ` • ${expense.description}`}
+              <div className="min-w-0 flex-1 ml-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {categories.find(c => c.id === expense.category)?.name}
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900 ml-3 shrink-0">
+                    ₹{expense.amount.toFixed(2)}
                   </p>
                 </div>
-                <div className="flex items-center space-x-1 ml-2 shrink-0">
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTooltip(activeTooltip === expense.id ? null : expense.id)}
-                      className={`p-1.5 rounded-full transition-colors ${
-                        activeTooltip === expense.id ? 'text-indigo-600' : 'text-gray-400 hover:text-indigo-600'
-                      }`}
-                    >
-                      <Info className="w-4 h-4" />
-                    </button>
-                    {activeTooltip === expense.id && (
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-gray-800 text-xs text-white rounded-md shadow-lg z-10">
-                        <div className="p-2">
-                          <p>
-                            {getTimestamp(expense).isUpdated ? 'Last updated' : 'Added'}: {getTimestamp(expense).text}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                <div className="flex items-center justify-between mt-0.5">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <p className="text-xs text-gray-500 truncate">
+                      {formatDate(expense.expense_date)}
+                      {expense.description && ` • ${expense.description}`}
+                    </p>
                   </div>
-                  <button
-                    onClick={() => onEdit(expense)}
-                    className="p-1.5 text-gray-400 hover:text-indigo-600 rounded-full transition-colors"
-                    title="Edit expense"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (window.confirm('Are you sure you want to delete this expense?')) {
-                        onDelete(expense.id);
-                      }
-                    }}
-                    className="p-1.5 text-gray-400 hover:text-red-600 rounded-full transition-colors"
-                    title="Delete expense"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center space-x-1 ml-2 shrink-0">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setActiveTooltip(activeTooltip === expense.id ? null : expense.id)
+                        }
+                        className={`p-1.5 rounded-full transition-colors ${
+                          activeTooltip === expense.id
+                            ? 'text-indigo-600'
+                            : 'text-gray-400 hover:text-indigo-600'
+                        }`}
+                      >
+                        <Info className="w-4 h-4" />
+                      </button>
+                      {activeTooltip === expense.id && (
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-gray-800 text-xs text-white rounded-md shadow-lg z-10">
+                          <div className="p-2">
+                            <p>
+                              {getTimestamp(expense).isUpdated ? 'Last updated' : 'Added'}:{' '}
+                              {getTimestamp(expense).text}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => onEdit(expense)}
+                      className="p-1.5 text-gray-400 hover:text-indigo-600 rounded-full transition-colors"
+                      title="Edit expense"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this expense?')) {
+                          onDelete(expense.id);
+                        }
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-red-600 rounded-full transition-colors"
+                      title="Delete expense"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         ))
       ) : (
         <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
           <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
           <p className="text-gray-500">
-            {expenses.length === 0 
-              ? "No expenses yet. Add your first expense!"
-              : "No expenses match your search criteria."}
+            {expenses.length === 0
+              ? 'No expenses yet. Add your first expense!'
+              : 'No expenses match your search criteria.'}
           </p>
         </div>
       )}

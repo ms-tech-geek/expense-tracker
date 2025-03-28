@@ -14,15 +14,7 @@ import { Bar, Pie } from 'react-chartjs-2';
 import { ExpenseSummary as Summary, Category, DateRange, DateRangeOption } from '../../types';
 import { DATE_RANGE_OPTIONS } from '../../utils/expenseCalculations';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 interface ExpenseSummaryProps {
   summary: Summary;
@@ -31,11 +23,11 @@ interface ExpenseSummaryProps {
   onDateRangeChange: (range: DateRange) => void;
 }
 
-export function ExpenseSummary({ 
-  summary, 
-  categories, 
-  dateRange, 
-  onDateRangeChange
+export function ExpenseSummary({
+  summary,
+  categories,
+  dateRange,
+  onDateRangeChange,
 }: ExpenseSummaryProps) {
   const [isDatePickerOpen, setIsDatePickerOpen] = React.useState(false);
 
@@ -51,9 +43,7 @@ export function ExpenseSummary({
           <TrendingUp className="w-5 h-5 text-indigo-500" />
           <h3 className="font-medium text-gray-900">Total Expenses</h3>
         </div>
-        <p className="text-2xl font-bold text-gray-900">
-          ₹{summary.total.toFixed(2)}
-        </p>
+        <p className="text-2xl font-bold text-gray-900">₹{summary.total.toFixed(2)}</p>
       </div>
 
       <div className="bg-white p-6 -mx-4">
@@ -72,7 +62,7 @@ export function ExpenseSummary({
             </button>
             {isDatePickerOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1">
-                {DATE_RANGE_OPTIONS.map((option) => (
+                {DATE_RANGE_OPTIONS.map(option => (
                   <button
                     key={option.value}
                     onClick={() => handleDateRangeSelect(option.value)}
@@ -112,11 +102,11 @@ export function ExpenseSummary({
                 },
                 tooltip: {
                   callbacks: {
-                    label: (context) => {
+                    label: context => {
                       const value = context.raw as number;
                       return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    }
-                  }
+                    },
+                  },
                 },
               },
               scales: {
@@ -125,13 +115,14 @@ export function ExpenseSummary({
                     maxRotation: 0,
                     minRotation: 0,
                     autoSkip: true,
-                    maxTicksLimit: 12
-                  }
+                    maxTicksLimit: 12,
+                  },
                 },
                 y: {
                   beginAtZero: true,
                   ticks: {
-                    callback: (value) => `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                    callback: value =>
+                      `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                   },
                 },
               },
@@ -172,16 +163,16 @@ export function ExpenseSummary({
                     usePointStyle: true,
                     boxWidth: 12,
                     color: '#4b5563', // text-gray-600
-                  }
+                  },
                 },
                 tooltip: {
                   callbacks: {
-                    label: (context) => {
+                    label: context => {
                       const value = context.raw as number;
                       const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
                       const percentage = ((value / total) * 100).toFixed(1);
                       return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${percentage}%)`;
-                    }
+                    },
                   },
                 },
               },
@@ -197,13 +188,19 @@ export function ExpenseSummary({
         </div>
         <div className="space-y-2">
           {Object.entries(summary.byCategory).map(([categoryId, amount]) => {
-            const category = categories.find((c) => c.id === categoryId);
+            const category = categories.find(c => c.id === categoryId);
             if (!category) return null;
-            
+
             return (
               <div key={categoryId} className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{category.name}</span>
-                <span className="font-medium">₹{amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="font-medium">
+                  ₹
+                  {amount.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
               </div>
             );
           })}

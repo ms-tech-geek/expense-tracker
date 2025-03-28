@@ -17,7 +17,7 @@ export function useAuth() {
     // Initialize auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user?.email_confirmed_at) {
-      setUser(session?.user ?? null);
+        setUser(session?.user ?? null);
       } else {
         setUser(null);
       }
@@ -25,7 +25,9 @@ export function useAuth() {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       try {
         if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
           setUser(session?.user);
@@ -58,12 +60,12 @@ export function useAuth() {
 
   const handleSignOut = async () => {
     if (signOutLoading) return;
-    
+
     setSignOutLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
+
       setUser(null);
       setRefreshError(false);
     } catch (error) {
@@ -77,7 +79,11 @@ export function useAuth() {
   const handleDeleteAccount = async ({ onSuccess, onError }: DeleteAccountOptions = {}) => {
     if (!user || deleteAccountLoading) return;
 
-    if (!window.confirm('Are you sure you want to delete your account? This will permanently delete all your data and cannot be undone.')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to delete your account? This will permanently delete all your data and cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -112,6 +118,6 @@ export function useAuth() {
     refreshError,
     deleteAccountLoading,
     handleSignOut,
-    handleDeleteAccount
+    handleDeleteAccount,
   };
 }

@@ -22,16 +22,46 @@ const COLORS = [
 ];
 
 const ICONS = [
-  'ShoppingCart', 'CreditCard', 'Wallet', 'DollarSign',
-  'Car', 'Bus', 'Train', 'Plane',
-  'Home', 'Building', 'Hotel', 'Warehouse',
-  'Utensils', 'Coffee', 'Pizza', 'Beer',
-  'ShoppingBag', 'Shirt', 'Smartphone', 'Laptop',
-  'Stethoscope', 'Pill', 'Heart', 'Activity',
-  'Film', 'Tv', 'Music', 'Gamepad',
-  'Book', 'GraduationCap', 'Library', 'PenTool',
-  'Gift', 'Package', 'Tag', 'Tags',
-  'Zap', 'Phone', 'Wifi', 'Globe',
+  'ShoppingCart',
+  'CreditCard',
+  'Wallet',
+  'DollarSign',
+  'Car',
+  'Bus',
+  'Train',
+  'Plane',
+  'Home',
+  'Building',
+  'Hotel',
+  'Warehouse',
+  'Utensils',
+  'Coffee',
+  'Pizza',
+  'Beer',
+  'ShoppingBag',
+  'Shirt',
+  'Smartphone',
+  'Laptop',
+  'Stethoscope',
+  'Pill',
+  'Heart',
+  'Activity',
+  'Film',
+  'Tv',
+  'Music',
+  'Gamepad',
+  'Book',
+  'GraduationCap',
+  'Library',
+  'PenTool',
+  'Gift',
+  'Package',
+  'Tag',
+  'Tags',
+  'Zap',
+  'Phone',
+  'Wifi',
+  'Globe',
 ];
 
 interface CategoryFormProps {
@@ -74,11 +104,7 @@ export function CategoryForm({ onSubmit, initialCategory, onCancel }: CategoryFo
         <h2 className="text-xl font-semibold text-gray-900">
           {initialCategory ? 'Edit Category' : 'New Category'}
         </h2>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-gray-400 hover:text-gray-500"
-        >
+        <button type="button" onClick={onCancel} className="text-gray-400 hover:text-gray-500">
           <X className="w-5 h-5" />
         </button>
       </div>
@@ -91,18 +117,16 @@ export function CategoryForm({ onSubmit, initialCategory, onCancel }: CategoryFo
           type="text"
           id="name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           placeholder="e.g., Groceries"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Icon
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Icon</label>
         <div className="grid grid-cols-8 gap-2 max-h-40 overflow-y-auto p-2 border rounded-md">
-          {ICONS.map((iconName) => {
+          {ICONS.map(iconName => {
             const IconComponent = Icons[iconName as keyof typeof Icons];
             return (
               <button
@@ -110,9 +134,7 @@ export function CategoryForm({ onSubmit, initialCategory, onCancel }: CategoryFo
                 type="button"
                 onClick={() => setIcon(iconName)}
                 className={`p-2 rounded-md ${
-                  icon === iconName
-                    ? 'bg-indigo-50 ring-2 ring-indigo-500'
-                    : 'hover:bg-gray-50'
+                  icon === iconName ? 'bg-indigo-50 ring-2 ring-indigo-500' : 'hover:bg-gray-50'
                 }`}
               >
                 <IconComponent className={`w-5 h-5 ${color}`} />
@@ -123,19 +145,15 @@ export function CategoryForm({ onSubmit, initialCategory, onCancel }: CategoryFo
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Color
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
         <div className="grid grid-cols-5 gap-2">
-          {COLORS.map((colorOption) => (
+          {COLORS.map(colorOption => (
             <button
               key={colorOption.id}
               type="button"
               onClick={() => setColor(colorOption.id)}
               className={`p-2 rounded-md ${
-                color === colorOption.id
-                  ? 'ring-2 ring-indigo-500'
-                  : 'hover:bg-gray-50'
+                color === colorOption.id ? 'ring-2 ring-indigo-500' : 'hover:bg-gray-50'
               }`}
             >
               <div className={`w-full h-6 rounded ${colorOption.id.replace('text-', 'bg-')}`} />

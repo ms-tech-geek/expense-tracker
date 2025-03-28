@@ -26,14 +26,16 @@ export function DeleteAccount() {
 
           <div className="prose prose-sm">
             <p>
-              We're sorry to see you go. You have several options to delete your account and associated data:
+              We're sorry to see you go. You have several options to delete your account and
+              associated data:
             </p>
 
             <div className="space-y-4 mt-4">
               <div className="border rounded-lg p-4">
                 <h3 className="font-medium text-lg">Option 1: Delete through the App</h3>
                 <p className="mt-2">
-                  If you're logged in to the app, you can delete your account instantly through Settings:
+                  If you're logged in to the app, you can delete your account instantly through
+                  Settings:
                 </p>
                 <ol className="list-decimal list-inside mt-2 space-y-2">
                   <li>Go to Settings in the app</li>
@@ -44,10 +46,8 @@ export function DeleteAccount() {
 
               <div className="border rounded-lg p-4">
                 <h3 className="font-medium text-lg">Option 2: Email Request</h3>
-                <p className="mt-2">
-                  Send an email to request account deletion:
-                </p>
-                <a 
+                <p className="mt-2">Send an email to request account deletion:</p>
+                <a
                   href="mailto:mayanksethi.apps@gmail.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20account%20with%20email:"
                   className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
                 >
@@ -61,9 +61,7 @@ export function DeleteAccount() {
             </div>
 
             <div className="mt-8 text-sm text-gray-500">
-              <p>
-                After deletion:
-              </p>
+              <p>After deletion:</p>
               <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>All your personal information will be permanently deleted</li>
                 <li>All your expense data will be removed</li>

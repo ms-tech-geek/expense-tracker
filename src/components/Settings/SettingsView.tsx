@@ -14,15 +14,13 @@ export function SettingsView({ onDeleteAccount, deleteAccountLoading }: Settings
   return (
     <div className="p-4 space-y-6">
       <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
-      
+
       <div className="bg-white rounded-lg shadow p-4 space-y-4">
         <h3 className="font-medium text-gray-900">Data Management</h3>
-        
+
         <div className="border-t pt-4 space-y-6">
           <DataDeletionForm categories={categories} />
-          <p className="mt-2 text-gray-600">
-            You can request data deletion in any of these ways:
-          </p>
+          <p className="mt-2 text-gray-600">You can request data deletion in any of these ways:</p>
           <div className="mt-2 space-y-2 text-sm text-gray-500">
             <p className="flex items-start">
               <span className="font-medium mr-2">1.</span>
@@ -30,11 +28,23 @@ export function SettingsView({ onDeleteAccount, deleteAccountLoading }: Settings
             </p>
             <p className="flex items-start">
               <span className="font-medium mr-2">2.</span>
-              Visit <a href="https://expense-tracker-ms-tech-geek.netlify.app/delete-data" className="text-indigo-600 hover:text-indigo-700">our data deletion page</a>
+              Visit{' '}
+              <a
+                href="https://expense-tracker-ms-tech-geek.netlify.app/delete-data"
+                className="text-indigo-600 hover:text-indigo-700"
+              >
+                our data deletion page
+              </a>
             </p>
             <p className="flex items-start">
               <span className="font-medium mr-2">3.</span>
-              Email <a href="mailto:mayanksethi.apps@gmail.com?subject=Data%20Deletion%20Request" className="text-indigo-600 hover:text-indigo-700">mayanksethi.apps@gmail.com</a>
+              Email{' '}
+              <a
+                href="mailto:mayanksethi.apps@gmail.com?subject=Data%20Deletion%20Request"
+                className="text-indigo-600 hover:text-indigo-700"
+              >
+                mayanksethi.apps@gmail.com
+              </a>
             </p>
           </div>
 
@@ -54,11 +64,23 @@ export function SettingsView({ onDeleteAccount, deleteAccountLoading }: Settings
                 </p>
                 <p className="flex items-start">
                   <span className="font-medium mr-2">2.</span>
-                  Visit <a href="https://expense-tracker-ms-tech-geek.netlify.app/delete-account" className="text-indigo-600 hover:text-indigo-700">our account deletion page</a>
+                  Visit{' '}
+                  <a
+                    href="https://expense-tracker-ms-tech-geek.netlify.app/delete-account"
+                    className="text-indigo-600 hover:text-indigo-700"
+                  >
+                    our account deletion page
+                  </a>
                 </p>
                 <p className="flex items-start">
                   <span className="font-medium mr-2">3.</span>
-                  Email <a href="mailto:mayanksethi.apps@gmail.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20account%20with%20email:" className="text-indigo-600 hover:text-indigo-700">mayanksethi.apps@gmail.com</a>
+                  Email{' '}
+                  <a
+                    href="mailto:mayanksethi.apps@gmail.com?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20account%20with%20email:"
+                    className="text-indigo-600 hover:text-indigo-700"
+                  >
+                    mayanksethi.apps@gmail.com
+                  </a>
                 </p>
               </div>
               <button

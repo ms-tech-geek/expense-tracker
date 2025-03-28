@@ -17,26 +17,28 @@ function useAppState() {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [activeView, setActiveView] = useState<'list' | 'add' | 'summary' | 'settings'>('list');
   const [dateRange, setDateRange] = useState<DateRange>('last-week');
-  return { 
-    editingExpense, 
-    setEditingExpense, 
-    activeView, 
-    setActiveView, 
+  return {
+    editingExpense,
+    setEditingExpense,
+    activeView,
+    setActiveView,
     dateRange,
-    setDateRange
+    setDateRange,
   };
 }
 
 function App() {
-  const { user, loading, signOutLoading, refreshError, deleteAccountLoading, handleSignOut, handleDeleteAccount } = useAuth();
-  const { 
-    editingExpense, 
-    setEditingExpense, 
-    activeView, 
-    setActiveView,
-    dateRange,
-    setDateRange
-  } = useAppState();
+  const {
+    user,
+    loading,
+    signOutLoading,
+    refreshError,
+    deleteAccountLoading,
+    handleSignOut,
+    handleDeleteAccount,
+  } = useAuth();
+  const { editingExpense, setEditingExpense, activeView, setActiveView, dateRange, setDateRange } =
+    useAppState();
   const { expenses, addExpense, updateExpense, deleteExpense, setExpenses } = useExpenses(user?.id);
   const { categories } = useCategories();
 
@@ -52,7 +54,7 @@ function App() {
                 <ExpenseList
                   expenses={expenses}
                   categories={categories}
-                  onEdit={(expense) => {
+                  onEdit={expense => {
                     setEditingExpense(expense);
                     setActiveView('add');
                   }}
@@ -69,7 +71,7 @@ function App() {
 
           {activeView === 'add' && (
             <div className="p-4">
-              <ExpenseForm 
+              <ExpenseForm
                 categories={categories}
                 onSubmit={editingExpense ? updateExpense : addExpense}
                 initialExpense={editingExpense}
@@ -84,8 +86,8 @@ function App() {
 
           {activeView === 'summary' && (
             <div className="p-4">
-              <ExpenseSummary 
-                summary={summary} 
+              <ExpenseSummary
+                summary={summary}
                 categories={categories}
                 dateRange={dateRange}
                 onDateRangeChange={setDateRange}
@@ -95,9 +97,11 @@ function App() {
 
           {activeView === 'settings' && (
             <SettingsView
-              onDeleteAccount={() => handleDeleteAccount({
-                onError: (error) => alert(error.message)
-              })}
+              onDeleteAccount={() =>
+                handleDeleteAccount({
+                  onError: error => alert(error.message),
+                })
+              }
               deleteAccountLoading={deleteAccountLoading}
             />
           )}
@@ -108,11 +112,7 @@ function App() {
     </div>
   );
 
-  const summary = calculateExpenseSummary(
-    expenses, 
-    categories, 
-    dateRange
-  );
+  const summary = calculateExpenseSummary(expenses, categories, dateRange);
 
   if (loading) {
     return (
@@ -130,7 +130,9 @@ function App() {
             <AlertCircle className="w-12 h-12 text-red-500" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900">Session Expired</h2>
-          <p className="text-gray-600">Your session has expired. Please sign in again to continue.</p>
+          <p className="text-gray-600">
+            Your session has expired. Please sign in again to continue.
+          </p>
           <button
             onClick={handleSignOut}
             className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -148,16 +150,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/delete-account" element={<DeleteAccount />} />
         <Route path="/delete-data" element={<DataDeletion />} />
-        <Route
-          path="/*"
-          element={
-            !user ? (
-              <AuthForm />
-            ) : (
-              <MainApp />
-            )
-          }
-        />
+        <Route path="/*" element={!user ? <AuthForm /> : <MainApp />} />
       </Routes>
     </BrowserRouter>
   );

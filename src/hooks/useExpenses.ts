@@ -40,10 +40,12 @@ export function useExpenses(userId: string | undefined) {
     setError(null);
     const { data, error } = await supabase
       .from('expenses')
-      .insert([{
-        ...newExpense,
-        user_id: userId
-      }])
+      .insert([
+        {
+          ...newExpense,
+          user_id: userId,
+        },
+      ])
       .select()
       .single();
 
@@ -52,7 +54,7 @@ export function useExpenses(userId: string | undefined) {
       throw error;
     }
 
-    setExpenses((prev) => [data, ...prev]);
+    setExpenses(prev => [data, ...prev]);
   };
 
   const updateExpense = async (expense: Expense) => {
@@ -63,7 +65,7 @@ export function useExpenses(userId: string | undefined) {
         amount: expense.amount,
         category: expense.category,
         description: expense.description,
-        expense_date: expense.expense_date
+        expense_date: expense.expense_date,
       })
       .eq('id', expense.id);
 
@@ -72,15 +74,12 @@ export function useExpenses(userId: string | undefined) {
       throw error;
     }
 
-    setExpenses(prev => prev.map(e => e.id === expense.id ? expense : e));
+    setExpenses(prev => prev.map(e => (e.id === expense.id ? expense : e)));
   };
 
   const deleteExpense = async (id: string) => {
     setError(null);
-    const { error } = await supabase
-      .from('expenses')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting expense:', error);
@@ -98,6 +97,6 @@ export function useExpenses(userId: string | undefined) {
     deleteExpense,
     setExpenses,
     error,
-    loadExpenses
+    loadExpenses,
   };
 }
