@@ -29,9 +29,9 @@ export function PrivacyPolicy() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Introduction</h3>
                 <p className="mt-2 text-gray-600">
-                  We are committed to protecting your privacy and ensuring the security of your personal information. 
-                  This Privacy Policy explains how we collect, use, and safeguard your data when you use our Expense 
-                  Tracker application.
+                  We are committed to protecting your privacy and ensuring the security of your
+                  personal information. This Privacy Policy explains how we collect, use, and
+                  safeguard your data when you use our Expense Tracker application.
                 </p>
               </div>
             </div>
@@ -82,8 +82,9 @@ export function PrivacyPolicy() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Data Deletion</h3>
                 <p className="mt-2 text-gray-600">
-                  You can request deletion of your account and associated data at any time through the app's settings. 
-                  Upon deletion, all your personal information and expense data will be permanently removed from our systems.
+                  You can request deletion of your account and associated data at any time through
+                  the app's settings. Upon deletion, all your personal information and expense data
+                  will be permanently removed from our systems.
                 </p>
               </div>
             </div>
@@ -93,9 +94,13 @@ export function PrivacyPolicy() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Contact Us</h3>
                 <p className="mt-2 text-gray-600">
-                  If you have any questions about this Privacy Policy or our data practices, please contact us at:
+                  If you have any questions about this Privacy Policy or our data practices, please
+                  contact us at:
                   <br />
-                  <a href="mailto:mayanksethi.apps@gmail.com" className="text-indigo-600 hover:text-indigo-700">
+                  <a
+                    href="mailto:mayanksethi.apps@gmail.com"
+                    className="text-indigo-600 hover:text-indigo-700"
+                  >
                     mayanksethi.apps@gmail.com
                   </a>
                 </p>
@@ -106,17 +111,19 @@ export function PrivacyPolicy() {
           <section className="pt-6 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Children's Privacy</h3>
             <p className="mt-2 text-gray-600">
-              Our service is not intended for children under 13 years of age. We do not knowingly collect personal 
-              information from children under 13. If you are a parent or guardian and believe that your child has 
-              provided us with personal information, please contact us so that we can take necessary actions.
+              Our service is not intended for children under 13 years of age. We do not knowingly
+              collect personal information from children under 13. If you are a parent or guardian
+              and believe that your child has provided us with personal information, please contact
+              us so that we can take necessary actions.
             </p>
           </section>
 
           <section className="pt-6 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Changes to This Policy</h3>
             <p className="mt-2 text-gray-600">
-              We may update our Privacy Policy from time to time. We will notify you of any changes by posting the 
-              new Privacy Policy on this page and updating the "Last updated" date at the top of this policy.
+              We may update our Privacy Policy from time to time. We will notify you of any changes
+              by posting the new Privacy Policy on this page and updating the "Last updated" date at
+              the top of this policy.
             </p>
           </section>
         </div>

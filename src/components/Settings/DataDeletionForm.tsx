@@ -36,9 +36,7 @@ export function DataDeletionForm({ categories }: DataDeletionFormProps) {
         requestData.category_id = categoryId;
       }
 
-      const { error } = await supabase
-        .from('data_deletion_requests')
-        .insert([requestData]);
+      const { error } = await supabase.from('data_deletion_requests').insert([requestData]);
 
       if (error) throw error;
 
@@ -72,7 +70,7 @@ export function DataDeletionForm({ categories }: DataDeletionFormProps) {
             </label>
             <select
               value={deletionType}
-              onChange={(e) => setDeletionType(e.target.value as DeletionType)}
+              onChange={e => setDeletionType(e.target.value as DeletionType)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             >
               <option value="all_expenses">All Expenses</option>
@@ -84,31 +82,27 @@ export function DataDeletionForm({ categories }: DataDeletionFormProps) {
           {deletionType === 'date_range' && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  From Date
-                </label>
+                <label className="block text-sm font-medium text-gray-700">From Date</label>
                 <div className="mt-1 relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="date"
                     required
                     value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
+                    onChange={e => setDateFrom(e.target.value)}
                     className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  To Date
-                </label>
+                <label className="block text-sm font-medium text-gray-700">To Date</label>
                 <div className="mt-1 relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="date"
                     required
                     value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
+                    onChange={e => setDateTo(e.target.value)}
                     className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 </div>
@@ -118,19 +112,17 @@ export function DataDeletionForm({ categories }: DataDeletionFormProps) {
 
           {deletionType === 'category' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Select Category
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Select Category</label>
               <div className="mt-1 relative">
                 <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <select
                   required
                   value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
+                  onChange={e => setCategoryId(e.target.value)}
                   className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
                   <option value="">Select a category</option>
-                  {categories.map((category) => (
+                  {categories.map(category => (
                     <option key={category.id} value={category.id}>
                       {category.name}
                     </option>

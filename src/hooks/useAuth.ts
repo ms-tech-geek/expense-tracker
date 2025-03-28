@@ -16,19 +16,30 @@ export function useAuth() {
   useEffect(() => {
     // Initialize auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      if (session?.user?.email_confirmed_at) {
+        setUser(session?.user ?? null);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       try {
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
           setUser(session?.user);
           setRefreshError(false);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setRefreshError(false);
+        } else if (event === 'USER_UPDATED') {
+          if (session?.user?.email_confirmed_at) {
+            setUser(session.user);
+            setRefreshError(false);
+          }
         } else if (event === 'TOKEN_REFRESHED') {
           setRefreshError(false);
         } else if (event === 'USER_DELETED') {
@@ -49,12 +60,12 @@ export function useAuth() {
 
   const handleSignOut = async () => {
     if (signOutLoading) return;
-    
+
     setSignOutLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
+
       setUser(null);
       setRefreshError(false);
     } catch (error) {
@@ -68,7 +79,11 @@ export function useAuth() {
   const handleDeleteAccount = async ({ onSuccess, onError }: DeleteAccountOptions = {}) => {
     if (!user || deleteAccountLoading) return;
 
-    if (!window.confirm('Are you sure you want to delete your account? This will permanently delete all your data and cannot be undone.')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to delete your account? This will permanently delete all your data and cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -103,6 +118,6 @@ export function useAuth() {
     refreshError,
     deleteAccountLoading,
     handleSignOut,
-    handleDeleteAccount
+    handleDeleteAccount,
   };
 }

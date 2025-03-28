@@ -38,7 +38,8 @@ export function DataDeletion() {
                 <ol className="list-decimal list-inside mt-2 space-y-2">
                   <li>Go to Settings in the app</li>
                   <li>Find "Request Data Deletion"</li>
-                  <li>Choose what data you want to delete:
+                  <li>
+                    Choose what data you want to delete:
                     <ul className="list-disc list-inside ml-6 mt-1">
                       <li>All expenses</li>
                       <li>Expenses from a specific date range</li>
@@ -50,10 +51,8 @@ export function DataDeletion() {
 
               <div className="border rounded-lg p-4">
                 <h3 className="font-medium text-lg">Option 2: Email Request</h3>
-                <p className="mt-2">
-                  Send an email to request data deletion:
-                </p>
-                <a 
+                <p className="mt-2">Send an email to request data deletion:</p>
+                <a
                   href="mailto:mayanksethi.apps@gmail.com?subject=Data%20Deletion%20Request&body=Please%20specify%20what%20data%20you%20would%20like%20to%20delete%20(all%20expenses%2C%20specific%20date%20range%2C%20or%20specific%20categories).%0A%0AEmail%20address%3A%20"
                   className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
                 >
@@ -61,7 +60,8 @@ export function DataDeletion() {
                   Send Deletion Request
                 </a>
                 <p className="mt-2 text-sm text-gray-500">
-                  Please include your registered email address and specify what data you want to delete.
+                  Please include your registered email address and specify what data you want to
+                  delete.
                 </p>
               </div>
             </div>
@@ -71,7 +71,9 @@ export function DataDeletion() {
               <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>Data deletion requests are processed within 24 hours</li>
                 <li>Deleted data cannot be recovered</li>
-                <li>Your account will remain active unless you specifically request account deletion</li>
+                <li>
+                  Your account will remain active unless you specifically request account deletion
+                </li>
                 <li>You can continue using the app after data deletion</li>
               </ul>
             </div>

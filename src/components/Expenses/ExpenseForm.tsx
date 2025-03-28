@@ -25,14 +25,18 @@ interface ExpenseFormProps {
   categories: Category[];
 }
 
-export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, categories }: ExpenseFormProps) {
+export function ExpenseForm({
+  onSubmit,
+  initialExpense,
+  onCancel,
+  onSuccess,
+  categories,
+}: ExpenseFormProps) {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  const [expenseDate, setExpenseDate] = useState(
-    new Date().toISOString().split('T')[0]
-  );
+  const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
 
   const groupedCategories = categories.reduce((acc: GroupedCategories, cat) => {
     if (!cat.parent_id) {
@@ -40,7 +44,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
       if (!acc[cat.id]) {
         acc[cat.id] = {
           parent: cat,
-          children: []
+          children: [],
         };
       }
     } else {
@@ -63,7 +67,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
 
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
-    
+
     // Amount validation
     const amountValue = parseFloat(amount);
     if (!amount.trim()) {
@@ -73,12 +77,12 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
     } else if (amountValue > MAX_AMOUNT) {
       errors.amount = 'Amount cannot exceed ₹1 crore';
     }
-    
+
     // Category validation
     if (!category) {
       errors.category = 'Please select a category';
     }
-    
+
     // Date validation
     const selectedDate = new Date(expenseDate);
     const today = new Date();
@@ -92,7 +96,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -110,7 +114,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
       } else {
         await onSubmit(expenseData);
       }
-      
+
       setAmount('');
       setCategory('');
       setDescription('');
@@ -118,12 +122,15 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
       onSuccess?.();
     } catch (error) {
       setValidationErrors({
-        amount: error instanceof Error ? error.message : 'Failed to save expense'
+        amount: error instanceof Error ? error.message : 'Failed to save expense',
       });
     }
   };
 
-  const handleInputChange = (field: 'amount' | 'category' | 'description' | 'expenseDate', value: string) => {
+  const handleInputChange = (
+    field: 'amount' | 'category' | 'description' | 'expenseDate',
+    value: string
+  ) => {
     switch (field) {
       case 'amount':
         setAmount(value);
@@ -148,11 +155,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
           {initialExpense ? 'Edit Expense' : 'Add New Expense'}
         </h2>
         {initialExpense && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="text-gray-400 hover:text-gray-500"
-          >
+          <button type="button" onClick={onCancel} className="text-gray-400 hover:text-gray-500">
             <X className="w-5 h-5" />
           </button>
         )}
@@ -174,7 +177,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
             required
             value={amount}
             autoComplete="off"
-            onChange={(e) => handleInputChange('amount', e.target.value)}
+            onChange={e => handleInputChange('amount', e.target.value)}
             className={`block w-full pl-7 pr-12 sm:text-sm rounded-md ${
               validationErrors.amount
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -203,7 +206,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
             required
             value={expenseDate}
             max={new Date().toISOString().split('T')[0]}
-            onChange={(e) => handleInputChange('expenseDate', e.target.value)}
+            onChange={e => handleInputChange('expenseDate', e.target.value)}
             className={`shadow-sm block w-full sm:text-sm rounded-md ${
               validationErrors.expenseDate
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -227,7 +230,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
           id="category"
           required
           value={category}
-          onChange={(e) => handleInputChange('category', e.target.value)}
+          onChange={e => handleInputChange('category', e.target.value)}
           className={`mt-2 block w-full pl-3 pr-10 py-2 text-base sm:text-sm rounded-md ${
             validationErrors.category
               ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
@@ -237,7 +240,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
           <option value="">Select a category</option>
           {Object.values(groupedCategories).map(({ parent, children }) => (
             <optgroup key={parent.id} label={parent.name}>
-              {children.map((child) => (
+              {children.map(child => (
                 <option
                   key={child.id}
                   value={child.id}
@@ -267,7 +270,7 @@ export function ExpenseForm({ onSubmit, initialExpense, onCancel, onSuccess, cat
             name="description"
             id="description"
             value={description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
+            onChange={e => handleInputChange('description', e.target.value)}
             className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
             placeholder="Lunch with colleagues"
           />

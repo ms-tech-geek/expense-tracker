@@ -6,6 +6,6 @@ export function useCategories() {
   const [categories] = useState<Category[]>(DEFAULT_CATEGORIES);
 
   return {
-    categories
+    categories,
   };
 }
