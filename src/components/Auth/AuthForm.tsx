@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, Wallet, AlertCircle, Loader2 } from 'lucide-react';
+import { LogIn, UserPlus, Wallet, AlertCircle, Loader2, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 
@@ -10,11 +10,13 @@ interface ValidationErrors {
 
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [loading, setLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
@@ -58,6 +60,7 @@ export function AuthForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setResetSuccess(false);
     setValidationErrors({});
     
     if (!validateForm()) {
@@ -67,7 +70,16 @@ export function AuthForm() {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (isForgotPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/update-password`,
+        });
+        if (error) throw error;
+        setResetSuccess(true);
+        setEmail('');
+        setError('Password reset instructions have been sent to your email');
+        return;
+      } else if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -76,12 +88,18 @@ export function AuthForm() {
           if (error.message === 'Invalid login credentials') {
             throw new Error('Invalid email or password');
           }
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('Please check your email to confirm your account before signing in');
+          }
           throw error;
         }
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`
+          }
         });
         if (error) {
           if (error.message.includes('password')) {
@@ -89,8 +107,8 @@ export function AuthForm() {
           }
           throw error;
         }
-        if (data.user && !data.session) {
-          setError('Please check your email to confirm your account');
+        if (data.user) {
+          setError('Please check your email to confirm your account. You will not be able to sign in until you confirm your email.');
           setEmail('');
           setPassword('');
           return;
@@ -101,6 +119,16 @@ export function AuthForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleModeChange = (mode: 'login' | 'signup' | 'forgot') => {
+    setIsLogin(mode === 'login');
+    setIsForgotPassword(mode === 'forgot');
+    setError(null);
+    setResetSuccess(false);
+    setValidationErrors({});
+    setEmail('');
+    setPassword('');
   };
 
   return (
@@ -122,7 +150,7 @@ export function AuthForm() {
 
         <div className="bg-white px-6 py-8 rounded-xl shadow-sm space-y-6">
           <h2 className="text-2xl font-semibold text-center text-gray-900">
-            {isLogin ? 'Welcome Back!' : 'Create Account'}
+            {isForgotPassword ? 'Reset Password' : (isLogin ? 'Welcome Back!' : 'Create Account')}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -152,7 +180,7 @@ export function AuthForm() {
               )}
             </div>
 
-            <div>
+            {!isForgotPassword && <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
@@ -177,18 +205,38 @@ export function AuthForm() {
                   {validationErrors.password}
                 </p>
               )}
+              {isLogin && (
+                <div className="mt-1 text-right">
+                  <button
+                    type="button"
+                    onClick={() => handleModeChange('forgot')}
+                    className="text-sm text-indigo-600 hover:text-indigo-700"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
               {!isLogin && (
                 <p className="mt-1 text-xs text-gray-500 flex items-center">
                   <AlertCircle className="w-3 h-3 mr-1" />
                   Must contain at least 6 characters with letters and numbers
                 </p>
               )}
-            </div>
+            </div>}
 
             {error && (
               <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-center">
                 <AlertCircle className="w-5 h-5 text-red-500 mr-2 flex-shrink-0" />
                 <p className="text-sm text-red-600 flex-1">{error}</p>
+              </div>
+            )}
+
+            {resetSuccess && (
+              <div className="p-3 bg-green-50 border border-green-100 rounded-lg flex items-center">
+                <Mail className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
+                <p className="text-sm text-green-600 flex-1">
+                  Password reset instructions have been sent to your email.
+                </p>
               </div>
             )}
 
@@ -200,8 +248,13 @@ export function AuthForm() {
               {loading ? (
                 <div className="flex items-center">
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  {isLogin ? 'Signing in...' : 'Creating account...'}
+                  {isForgotPassword ? 'Sending Reset Link...' : (isLogin ? 'Signing in...' : 'Creating account...')}
                 </div>
+              ) : isForgotPassword ? (
+                <>
+                  <Mail className="w-5 h-5 mr-2" />
+                  Send Reset Link
+                </>
               ) : isLogin ? (
                 <>
                   <LogIn className="w-5 h-5 mr-2" />
@@ -222,18 +275,20 @@ export function AuthForm() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-white text-gray-500">
-                {isLogin ? "New to Expense Tracker?" : "Already have an account?"}
+                {isForgotPassword ? "Remember your password?" : (isLogin ? "New to Expense Tracker?" : "Already have an account?")}
               </span>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="w-full text-center text-sm text-indigo-600 hover:text-indigo-500"
-          >
-            {isLogin ? 'Create an account' : 'Sign in to your account'}
-          </button>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => handleModeChange(isForgotPassword ? 'login' : (isLogin ? 'signup' : 'login'))}
+              className="w-full text-center text-sm text-indigo-600 hover:text-indigo-500"
+            >
+              {isForgotPassword ? 'Back to Sign In' : (isLogin ? 'Create an account' : 'Sign in to your account')}
+            </button>
+          </div>
 
           <div className="text-center text-sm text-gray-500 flex items-center justify-center gap-1">
             <span>By using Expense Tracker, you agree to our</span>
