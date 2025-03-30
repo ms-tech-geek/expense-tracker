@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Save, X, AlertCircle } from 'lucide-react';
 import { Expense, Category } from '../../types';
 
+interface CategoryGroup {
+  parent: Category;
+  children: Category[];
+}
+
 interface ValidationErrors {
   amount?: string;
   category?: string;
@@ -9,13 +14,6 @@ interface ValidationErrors {
 }
 
 const MAX_AMOUNT = 10000000; // 1 crore INR
-
-interface GroupedCategories {
-  [key: string]: {
-    parent: Category;
-    children: Category[];
-  };
-}
 
 interface ExpenseFormProps {
   onSubmit: (expense: any) => void;
@@ -33,37 +31,36 @@ export function ExpenseForm({
   categories,
 }: ExpenseFormProps) {
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('');
+  const [mainCategory, setMainCategory] = useState('');
+  const [subCategory, setSubCategory] = useState('');
   const [description, setDescription] = useState('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
 
-  const groupedCategories = categories.reduce((acc: GroupedCategories, cat) => {
-    if (!cat.parent_id) {
-      // This is a parent category
-      if (!acc[cat.id]) {
-        acc[cat.id] = {
-          parent: cat,
-          children: [],
-        };
-      }
-    } else {
-      // This is a child category
-      if (acc[cat.parent_id]) {
-        acc[cat.parent_id].children.push(cat);
-      }
-    }
-    return acc;
-  }, {});
+  // Get main categories (those without parent_id)
+  const mainCategories = categories.filter(cat => !cat.parent_id);
+  
+  // Get sub-categories for selected main category
+  const subCategories = categories.filter(cat => cat.parent_id === mainCategory);
 
   useEffect(() => {
     if (initialExpense) {
       setAmount(initialExpense.amount.toString());
-      setCategory(initialExpense.category);
+      const category = categories.find(c => c.id === initialExpense.category);
+      if (category?.parent_id) {
+        setMainCategory(category.parent_id);
+        setSubCategory(category.id);
+      }
       setDescription(initialExpense.description || '');
       setExpenseDate(new Date(initialExpense.expense_date).toISOString().split('T')[0]);
     }
   }, [initialExpense]);
+
+  // Reset sub-category when main category changes
+  useEffect(() => {
+    setSubCategory('');
+    setValidationErrors(prev => ({ ...prev, category: undefined }));
+  }, [mainCategory]);
 
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
@@ -79,8 +76,10 @@ export function ExpenseForm({
     }
 
     // Category validation
-    if (!category) {
-      errors.category = 'Please select a category';
+    if (!mainCategory) {
+      errors.category = 'Please select a main category';
+    } else if (!subCategory) {
+      errors.category = 'Please select a sub-category';
     }
 
     // Date validation
@@ -103,7 +102,7 @@ export function ExpenseForm({
 
     const expenseData = {
       amount: parseFloat(amount),
-      category,
+      category: subCategory,
       description,
       expense_date: new Date(expenseDate).toISOString(),
     };
@@ -116,7 +115,8 @@ export function ExpenseForm({
       }
 
       setAmount('');
-      setCategory('');
+      setMainCategory('');
+      setSubCategory('');
       setDescription('');
       setValidationErrors({});
       onSuccess?.();
@@ -134,9 +134,6 @@ export function ExpenseForm({
     switch (field) {
       case 'amount':
         setAmount(value);
-        break;
-      case 'category':
-        setCategory(value);
         break;
       case 'description':
         setDescription(value);
@@ -223,33 +220,52 @@ export function ExpenseForm({
       </div>
 
       <div>
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-          Category
+        <label htmlFor="mainCategory" className="block text-sm font-medium text-gray-700">
+          Main Category
         </label>
         <select
-          id="category"
+          id="mainCategory"
           required
-          value={category}
-          onChange={e => handleInputChange('category', e.target.value)}
+          value={mainCategory}
+          onChange={e => setMainCategory(e.target.value)}
           className={`mt-2 block w-full pl-3 pr-10 py-2 text-base sm:text-sm rounded-md ${
             validationErrors.category
               ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
               : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
           }`}
         >
-          <option value="">Select a category</option>
-          {Object.values(groupedCategories).map(({ parent, children }) => (
-            <optgroup key={parent.id} label={parent.name}>
-              {children.map(child => (
-                <option
-                  key={child.id}
-                  value={child.id}
-                  disabled={!child.parent_id} // Disable parent categories
-                >
-                  {child.name}
-                </option>
-              ))}
-            </optgroup>
+          <option value="">Select main category</option>
+          {mainCategories.map(category => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700">
+          Sub-Category
+        </label>
+        <select
+          id="subCategory"
+          required
+          value={subCategory}
+          onChange={e => setSubCategory(e.target.value)}
+          disabled={!mainCategory}
+          className={`mt-2 block w-full pl-3 pr-10 py-2 text-base sm:text-sm rounded-md ${
+            !mainCategory
+              ? 'bg-gray-100 cursor-not-allowed'
+              : validationErrors.category
+              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+              : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+          }`}
+        >
+          <option value="">Select sub-category</option>
+          {subCategories.map(category => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
           ))}
         </select>
         {validationErrors.category && (
@@ -280,6 +296,7 @@ export function ExpenseForm({
       <button
         type="submit"
         className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        disabled={!mainCategory || !subCategory}
       >
         {initialExpense ? (
           <>
