@@ -8,15 +8,7 @@ export function PrivacyPolicy() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm py-4 px-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center text-gray-600 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-lg p-1 transition-colors"
-              aria-label="Go back to previous page"
-            >
-              <ArrowLeft className="w-6 h-6" />
-              <span className="ml-1 text-sm font-medium">Back</span>
-            </button>
+          <div className="flex items-center space-x-3 flex-1">
             <div className="bg-indigo-600 p-2 rounded-full">
               <Wallet className="w-6 h-6 text-white" />
             </div>
@@ -25,6 +17,14 @@ export function PrivacyPolicy() {
               <p className="text-sm text-gray-600">Privacy Policy</p>
             </div>
           </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-gray-600 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-lg p-1 transition-colors ml-4"
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft className="w-6 h-6" />
+            <span className="ml-1 text-sm font-medium">Back</span>
+          </button>
         </div>
       </header>
 
