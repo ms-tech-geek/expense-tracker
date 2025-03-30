@@ -39,7 +39,7 @@ export function ExpenseForm({
 
   // Get main categories (those without parent_id)
   const mainCategories = categories.filter(cat => !cat.parent_id);
-  
+
   // Get sub-categories for selected main category
   const subCategories = categories.filter(cat => cat.parent_id === mainCategory);
 
@@ -257,8 +257,8 @@ export function ExpenseForm({
             !mainCategory
               ? 'bg-gray-100 cursor-not-allowed'
               : validationErrors.category
-              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-              : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
           }`}
         >
           <option value="">Select sub-category</option>
