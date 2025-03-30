@@ -1,18 +1,30 @@
-import React from 'react';
-import { Wallet, Shield, Eye, Lock, Database, Trash2, Mail } from 'lucide-react';
+import { Wallet, Shield, Eye, Lock, Database, Trash2, Mail, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function PrivacyPolicy() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm py-4 px-4">
-        <div className="flex items-center space-x-3">
-          <div className="bg-indigo-600 p-2 rounded-full">
-            <Wallet className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3 flex-1">
+            <div className="bg-indigo-600 p-2 rounded-full">
+              <Wallet className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Expense Tracker</h1>
+              <p className="text-sm text-gray-600">Privacy Policy</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Expense Tracker</h1>
-            <p className="text-sm text-gray-600">Privacy Policy</p>
-          </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-gray-600 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-lg p-1 transition-colors ml-4"
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft className="w-6 h-6" />
+            <span className="ml-1 text-sm font-medium">Back</span>
+          </button>
         </div>
       </header>
 
