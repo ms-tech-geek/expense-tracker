@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, Wallet, AlertCircle, Loader2, Mail } from 'lucide-react';
+import { LogIn, UserPlus, Wallet, AlertCircle, Loader2, Mail, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 
@@ -11,6 +11,7 @@ interface ValidationErrors {
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -127,6 +128,7 @@ export function AuthForm() {
   const handleModeChange = (mode: 'login' | 'signup' | 'forgot') => {
     setIsLogin(mode === 'login');
     setIsForgotPassword(mode === 'forgot');
+    setShowPassword(false);
     setError(null);
     setResetSuccess(false);
     setValidationErrors({});
@@ -185,22 +187,35 @@ export function AuthForm() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  autoComplete={isLogin ? 'current-password' : 'new-password'}
-                  minLength={6}
-                  onChange={e => handleInputChange('password', e.target.value)}
-                  className={`mt-1 block w-full rounded-lg shadow-sm 
-                  ${
-                    validationErrors.password
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
-                  }`}
-                  placeholder="••••••"
-                />
+                <div className="relative mt-1">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    autoComplete={isLogin ? 'current-password' : 'new-password'}
+                    minLength={6}
+                    onChange={e => handleInputChange('password', e.target.value)}
+                    className={`block w-full pr-10 rounded-lg shadow-sm 
+                    ${
+                      validationErrors.password
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+                    }`}
+                    placeholder="••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" aria-label="Hide password" />
+                    ) : (
+                      <Eye className="w-5 h-5" aria-label="Show password" />
+                    )}
+                  </button>
+                </div>
                 {validationErrors.password && (
                   <p className="mt-1 text-sm text-red-600 flex items-center">
                     <AlertCircle className="w-4 h-4 mr-1" />
